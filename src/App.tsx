@@ -51,7 +51,10 @@ const CustomCursor = () => {
     <>
       <div 
         className="fixed top-0 left-0 w-3 h-3 bg-gold rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100 hidden md:block"
-        style={{ transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)` }}
+        style={{ 
+          transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)`,
+          boxShadow: '0 0 15px #C9A84C, 0 0 30px #C9A84C'
+        }}
       />
       <div 
         className="fixed top-0 left-0 w-9 h-9 border border-gold rounded-full pointer-events-none z-[9998] opacity-60 hidden md:block"
@@ -80,17 +83,37 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
       <ul className="relative z-10 hidden md:flex gap-10 list-none">
         {['Story', 'On Pitch', 'Trophies', 'Career', 'Social'].map(item => (
           <li key={item}>
-            <a href={`#${item.toLowerCase().replace(' ', '-')}`} className="text-[0.65rem] tracking-[0.2em] uppercase text-white/70 hover:text-gold transition-colors">
+            <motion.a 
+              href={`#${item.toLowerCase().replace(' ', '-')}`} 
+              className="relative text-[0.65rem] tracking-[0.2em] uppercase text-white/70 hover:text-gold transition-colors group inline-block"
+              whileHover={{ 
+                y: -5,
+                scale: 1.1,
+                transition: { type: "spring", stiffness: 400, damping: 10 }
+              }}
+            >
               {item}
-            </a>
+              <motion.span 
+                className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"
+              />
+            </motion.a>
           </li>
         ))}
       </ul>
 
       <div className="relative z-10 flex items-center gap-6">
-        <a href="mailto:josiahjohnmark9@gmail.com" className="hidden sm:block text-[0.65rem] tracking-[0.15em] uppercase text-gold border border-gold/40 px-4 py-2 hover:bg-gold/10 transition-colors">
+        <motion.a 
+          href="mailto:josiahjohnmark9@gmail.com" 
+          className="hidden sm:block text-[0.65rem] tracking-[0.15em] uppercase text-gold border border-gold/40 px-4 py-2 hover:bg-gold/10 transition-colors"
+          whileHover={{ 
+            scale: 1.05,
+            boxShadow: "0 0 20px rgba(201,168,76,0.3)",
+            transition: { type: "spring", stiffness: 400, damping: 10 }
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
           Inquiries
-        </a>
+        </motion.a>
         <button 
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="md:hidden text-gold p-2"
@@ -129,13 +152,39 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
 };
 
 const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, tag: string, bgImage?: string }) => {
+  const nameArray1 = name1.split('');
+  const nameArray2 = name2.split('');
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const particles = Array.from({ length: 20 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ 
+        x: (e.clientX / window.innerWidth - 0.5) * 20, 
+        y: (e.clientY / window.innerHeight - 0.5) * 20 
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <section className="relative h-screen flex items-end overflow-hidden">
-      {/* Background Image with Animation */}
+      {/* Background Image with Parallax */}
       <motion.div 
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.4 }}
-        transition={{ duration: 2, ease: "easeOut" }}
+        initial={{ scale: 1.2, opacity: 0 }}
+        animate={{ 
+          scale: 1, 
+          opacity: 0.4,
+          x: -mousePos.x,
+          y: -mousePos.y
+        }}
+        transition={{ 
+          scale: { duration: 2.5, ease: [0.22, 1, 0.36, 1] },
+          opacity: { duration: 2.5 },
+          x: { type: "spring", stiffness: 50, damping: 30 },
+          y: { type: "spring", stiffness: 50, damping: 30 }
+        }}
         className="absolute inset-0 z-0"
       >
         {bgImage ? (
@@ -153,10 +202,43 @@ const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, ta
 
       <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_48px,rgba(116,172,223,0.025)_48px,rgba(116,172,223,0.025)_50px)] pointer-events-none" />
       
+      {/* Particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {particles.map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ 
+              x: Math.random() * 100 + "%", 
+              y: Math.random() * 100 + "%",
+              opacity: Math.random() * 0.5
+            }}
+            animate={{ 
+              y: [null, "-100%"],
+              opacity: [0, 0.5, 0]
+            }}
+            transition={{ 
+              duration: Math.random() * 10 + 10, 
+              repeat: Infinity, 
+              ease: "linear",
+              delay: Math.random() * 10
+            }}
+            className="absolute w-1 h-1 bg-gold rounded-full blur-[1px]"
+          />
+        ))}
+      </div>
+      
       <motion.div 
         initial={{ opacity: 0, x: 100 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        animate={{ 
+          opacity: 1, 
+          x: mousePos.x * 2,
+          y: [0, -20, 0]
+        }}
+        transition={{ 
+          opacity: { duration: 1.5 },
+          x: { type: "spring", stiffness: 50, damping: 30 },
+          y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
+        }}
         className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[15rem] sm:text-[20rem] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-0" 
         style={{ WebkitTextStroke: '1px rgba(116,172,223,0.12)' }}
       >
@@ -170,43 +252,113 @@ const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, ta
           transition={{ duration: 0.8 }}
           className="flex items-center gap-4 mb-4 md:mb-6 text-[0.5rem] md:text-[0.6rem] tracking-[0.3em] uppercase text-gold"
         >
-          <div className="w-6 md:w-10 h-px bg-gold" />
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: 40 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="h-px bg-gold" 
+          />
           {tag}
         </motion.div>
         
-        <motion.h1 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-anton text-5xl sm:text-7xl md:text-[12vw] lg:text-[14rem] leading-[0.88] tracking-tight uppercase mt-0 p-0 mb-4 ml-[-15px]"
+        <div className="font-anton text-5xl sm:text-7xl md:text-[12vw] lg:text-[14rem] leading-[0.88] tracking-tight uppercase mt-0 p-0 mb-4 ml-[-15px] cursor-default">
+          <div className="flex flex-wrap overflow-hidden">
+            {nameArray1.map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.8, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  color: "#C9A84C",
+                  textShadow: "0 0 20px rgba(201,168,76,0.5)",
+                  skewX: [0, -10, 10, 0],
+                  x: [0, -2, 2, 0],
+                  transition: { duration: 0.2, repeat: Infinity }
+                }}
+                className="inline-block"
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </motion.span>
+            ))}
+          </div>
+          <div className="flex flex-wrap overflow-hidden text-albi">
+            {nameArray2.map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 + (0.05 * i), ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  color: "#C9A84C",
+                  textShadow: "0 0 20px rgba(201,168,76,0.5)",
+                  skewX: [0, -10, 10, 0],
+                  x: [0, -2, 2, 0],
+                  transition: { duration: 0.2, repeat: Infinity }
+                }}
+                className="inline-block"
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </motion.span>
+            ))}
+          </div>
+        </div>
+        
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          className="text-[0.6rem] md:text-[0.7rem] tracking-[0.2em] uppercase text-gray mt-[-6px] mb-0"
         >
-          {name1}
-          <span className="block text-albi">{name2}</span>
-        </motion.h1>
-        
-        <p className="text-[0.6rem] md:text-[0.7rem] tracking-[0.2em] uppercase text-gray mt-[-6px] mb-0">
           The Greatest of All Time · Rosario, Argentina · Born 1987
-        </p>
+        </motion.p>
         
-        <div className="flex flex-wrap gap-6 md:gap-12 mb-8">
+        <div className="flex flex-wrap gap-6 md:gap-12 mb-8 mt-8">
           {[
             { num: '8×', label: "Ballon d'Or" },
             { num: '1', label: 'World Cup' },
             { num: '4×', label: 'Champions League' },
             { num: '672', label: 'La Liga Goals' }
-          ].map(stat => (
-            <div key={stat.label}>
+          ].map((stat, i) => (
+            <motion.div 
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 1.8 + (i * 0.1),
+                type: "spring",
+                stiffness: 200,
+                damping: 15
+              }}
+              whileHover={{ 
+                y: -10,
+                scale: 1.1,
+                transition: { duration: 0.2 }
+              }}
+            >
               <div className="font-anton text-3xl md:text-4xl text-gold leading-none">{stat.num}</div>
               <div className="text-[0.5rem] md:text-[0.55rem] tracking-[0.15em] uppercase text-gray mt-1">{stat.label}</div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
 
-      <div className="absolute bottom-8 right-12 hidden md:flex flex-col items-center gap-2 text-[0.55rem] tracking-[0.2em] uppercase text-gray animate-pulse">
-        <div className="w-px h-[60px] bg-gradient-to-b from-gold to-transparent" />
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 2 }}
+        className="absolute bottom-8 right-12 hidden md:flex flex-col items-center gap-2 text-[0.55rem] tracking-[0.2em] uppercase text-gray"
+      >
+        <motion.div 
+          animate={{ height: [0, 60, 0], y: [0, 0, 60] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px bg-gold" 
+        />
         Scroll
-      </div>
+      </motion.div>
     </section>
   );
 };
@@ -597,7 +749,8 @@ export default function App() {
   }, [clickCount]);
 
   return (
-    <div className="cursor-none selection:bg-gold selection:text-black">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-gold selection:text-black cursor-none">
+      <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       <CustomCursor />
       <Navbar onLogoClick={handleLogoClick} />
       
