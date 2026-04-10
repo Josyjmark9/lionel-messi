@@ -33,6 +33,10 @@ interface AdminPanelProps {
   setQuoteData: (data: any) => void;
   footerData: any;
   setFooterData: (data: any) => void;
+  photoStripData: any[];
+  setPhotoStripData: (data: any[]) => void;
+  socialPhotosData: string[];
+  setSocialPhotosData: (data: string[]) => void;
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ 
@@ -43,7 +47,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   quoteData, 
   setQuoteData,
   footerData,
-  setFooterData
+  setFooterData,
+  photoStripData,
+  setPhotoStripData,
+  socialPhotosData,
+  setSocialPhotosData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -57,6 +65,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         } else {
           setFooterData({ ...footerData, bgImage: reader.result as string });
         }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhotoStripUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newData = [...photoStripData];
+        newData[index] = { ...newData[index], image: reader.result as string };
+        setPhotoStripData(newData);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSocialPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newData = [...socialPhotosData];
+        newData[index] = reader.result as string;
+        setSocialPhotosData(newData);
       };
       reader.readAsDataURL(file);
     }
@@ -272,14 +306,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div className="space-y-6">
                   <div className="admin-card">
-                    <h3 className="admin-label text-gold mb-6">Hero Background</h3>
+                    <h3 className="admin-label text-gold mb-6">Main Vintage Image</h3>
+                    <p className="text-[0.55rem] text-gray mb-4 italic">This is the large background image that appears on the first page with a smooth fade-in animation.</p>
                     <div className="admin-img-slot relative overflow-hidden group">
                       {heroData.bgImage ? (
                         <img src={heroData.bgImage} alt="Hero BG" className="w-full h-full object-cover opacity-50" />
                       ) : (
                         <>
                           <Plus size={20} className="opacity-40" />
-                          <span>Hero Background Photo</span>
+                          <span>Main Messi Photo</span>
                         </>
                       )}
                       <input 
@@ -381,12 +416,92 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
               </motion.div>
             )}
 
-            {/* Placeholder for other tabs to keep it concise */}
-            {!['dashboard', 'hero', 'story', 'nav-footer'].includes(activeTab) && (
-              <div className="flex flex-col items-center justify-center h-64 text-gray">
-                <Settings size={48} className="opacity-10 mb-4 animate-spin-slow" />
-                <p className="text-[0.7rem] tracking-widest uppercase">This section is ready for content integration</p>
-              </div>
+            {activeTab === 'photos' && (
+              <motion.div 
+                key="photos"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="grid grid-cols-2 gap-6"
+              >
+                {photoStripData.map((photo, i) => (
+                  <div key={i} className="admin-card">
+                    <h3 className="admin-label text-gold mb-4 flex items-center justify-between">
+                      Slot {i + 1}: {photo.title}
+                      <span className="text-[0.5rem] tracking-widest text-gray">{photo.year}</span>
+                    </h3>
+                    <div className="grid grid-cols-[100px_1fr] gap-4">
+                      <div className="admin-img-slot h-24 relative overflow-hidden group">
+                        {photo.image ? (
+                          <img src={photo.image} alt={photo.title} className="w-full h-full object-cover opacity-50" />
+                        ) : (
+                          <Plus size={16} className="opacity-40" />
+                        )}
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={(e) => handlePhotoStripUpload(e, i)}
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="admin-field">
+                          <label className="admin-label">Image URL</label>
+                          <input 
+                            type="url" 
+                            value={photo.image || ''}
+                            onChange={(e) => {
+                              const newData = [...photoStripData];
+                              newData[i] = { ...newData[i], image: e.target.value };
+                              setPhotoStripData(newData);
+                            }}
+                            placeholder="https://..." 
+                            className="admin-input" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+
+            {activeTab === 'social' && (
+              <motion.div 
+                key="social"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="grid grid-cols-3 gap-4"
+              >
+                {socialPhotosData.map((img, i) => (
+                  <div key={i} className="admin-card">
+                    <h3 className="admin-label text-gold mb-3">Post Slot {i + 1}</h3>
+                    <div className="admin-img-slot aspect-square relative overflow-hidden group mb-3">
+                      {img ? (
+                        <img src={img} alt={`Social ${i}`} className="w-full h-full object-cover opacity-50" />
+                      ) : (
+                        <Plus size={16} className="opacity-40" />
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => handleSocialPhotoUpload(e, i)}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </div>
+                    <input 
+                      type="url" 
+                      value={img}
+                      onChange={(e) => {
+                        const newData = [...socialPhotosData];
+                        newData[i] = e.target.value;
+                        setSocialPhotosData(newData);
+                      }}
+                      placeholder="Image URL" 
+                      className="admin-input text-[0.6rem]" 
+                    />
+                  </div>
+                ))}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

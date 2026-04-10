@@ -128,14 +128,40 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
   );
 };
 
-const Hero = ({ name1, name2, tag }: { name1: string, name2: string, tag: string }) => {
+const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, tag: string, bgImage?: string }) => {
   return (
     <section className="relative h-screen flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(116,172,223,0.12)_0%,transparent_60%),radial-gradient(ellipse_at_80%_80%,rgba(201,168,76,0.08)_0%,transparent_50%),linear-gradient(135deg,#0A0A0A_0%,#111520_50%,#0A0A0A_100%)]" />
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_48px,rgba(116,172,223,0.025)_48px,rgba(116,172,223,0.025)_50px)]" />
-      <div className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[15rem] sm:text-[20rem] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none" style={{ WebkitTextStroke: '1px rgba(116,172,223,0.12)' }}>
+      {/* Background Image with Animation */}
+      <motion.div 
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.4 }}
+        transition={{ duration: 2, ease: "easeOut" }}
+        className="absolute inset-0 z-0"
+      >
+        {bgImage ? (
+          <img 
+            src={bgImage} 
+            alt="Messi Hero" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(116,172,223,0.12)_0%,transparent_60%),radial-gradient(ellipse_at_80%_80%,rgba(201,168,76,0.08)_0%,transparent_50%),linear-gradient(135deg,#0A0A0A_0%,#111520_50%,#0A0A0A_100%)]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+      </motion.div>
+
+      <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_48px,rgba(116,172,223,0.025)_48px,rgba(116,172,223,0.025)_50px)] pointer-events-none" />
+      
+      <motion.div 
+        initial={{ opacity: 0, x: 100 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[15rem] sm:text-[20rem] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-0" 
+        style={{ WebkitTextStroke: '1px rgba(116,172,223,0.12)' }}
+      >
         10
-      </div>
+      </motion.div>
       
       <div className="relative z-10 px-6 md:px-12 pb-12 md:pb-20 w-full">
         <motion.div 
@@ -230,18 +256,15 @@ const Story = () => (
   </section>
 );
 
-const PhotoStrip = () => {
-  const photos = [
-    { year: 'Qatar · 2022', title: 'World Cup Glory', icon: <Globe className="w-10 h-10 text-albi opacity-30" /> },
-    { year: 'Paris · 2023', title: '8th Ballon d\'Or', icon: <Star className="w-10 h-10 text-gold opacity-30" /> },
-    { year: 'Berlin · 2015', title: 'UCL Treble', icon: <Trophy className="w-10 h-10 text-albi opacity-30" /> },
-    { year: 'Brazil · 2021', title: 'Copa América Win', icon: <Globe className="w-10 h-10 text-gold opacity-30" /> },
-    { year: 'Miami · 2023', title: 'MLS Debut', icon: <Star className="w-10 h-10 text-albi opacity-30" /> },
-    { year: 'Camp Nou · 2012', title: '91 Goals Season', icon: <Trophy className="w-10 h-10 text-gold opacity-30" /> },
-  ];
-
+const PhotoStrip = ({ photos }: { photos: any[] }) => {
   return (
-    <div className="bg-black py-16 overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="bg-black py-16 overflow-hidden"
+    >
       <div className="px-6 md:px-12 mb-8 text-[0.6rem] tracking-[0.3em] uppercase text-gold">Career Moments</div>
       <motion.div 
         animate={{ x: [0, -1800] }}
@@ -250,10 +273,19 @@ const PhotoStrip = () => {
       >
         {[...photos, ...photos].map((photo, i) => (
           <div key={i} className="relative w-[280px] h-[380px] bg-mid border border-albi/10 overflow-hidden group">
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[0.6rem] tracking-widest uppercase text-albi/30">
-              {photo.icon}
-              <span className="text-center">{photo.title}<br/>Photo Slot</span>
-            </div>
+            {photo.image ? (
+              <img 
+                src={photo.image} 
+                alt={photo.title} 
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[0.6rem] tracking-widest uppercase text-albi/30">
+                {photo.icon}
+                <span className="text-center">{photo.title}<br/>Photo Slot</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-5 flex flex-col justify-end">
               <div className="text-[0.55rem] tracking-[0.2em] uppercase text-gold mb-1">{photo.year}</div>
               <div className="font-anton text-lg tracking-wider uppercase">{photo.title}</div>
@@ -261,7 +293,7 @@ const PhotoStrip = () => {
           </div>
         ))}
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -364,17 +396,33 @@ const Partners = () => (
   </section>
 );
 
-const Social = () => (
-  <section id="social" className="bg-black px-6 md:px-12 py-32 text-center">
+const Social = ({ photos }: { photos: string[] }) => (
+  <motion.section 
+    id="social" 
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 1 }}
+    className="bg-black px-6 md:px-12 py-32 text-center"
+  >
     <div className="flex items-center justify-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
       <div className="w-8 h-px bg-gold" />
       Follow Leo
     </div>
     <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">On Social</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
-      {[...Array(6)].map((_, i) => (
+      {photos.map((img, i) => (
         <div key={i} className="aspect-square bg-mid border border-albi/10 flex items-center justify-center text-[0.6rem] tracking-[0.2em] uppercase text-albi/20 group cursor-pointer overflow-hidden">
-          <div className="group-hover:scale-110 transition-transform duration-500">[ Instagram Photo Slot ]</div>
+          {img ? (
+            <img 
+              src={img} 
+              alt={`Social ${i}`} 
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="group-hover:scale-110 transition-transform duration-500">[ Instagram Photo Slot ]</div>
+          )}
         </div>
       ))}
     </div>
@@ -390,7 +438,7 @@ const Social = () => (
         </a>
       ))}
     </div>
-  </section>
+  </motion.section>
 );
 
 const Footer = ({ bgImage }: { bgImage: string }) => (
@@ -451,7 +499,8 @@ export default function App() {
   const [heroData, setHeroData] = useState({
     name1: 'Lionel',
     name2: 'Messi',
-    tag: 'Inter Miami CF · Argentine National Team'
+    tag: 'Inter Miami CF · Argentine National Team',
+    bgImage: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1974&auto=format&fit=crop'
   });
 
   const [quoteData, setQuoteData] = useState({
@@ -462,6 +511,17 @@ export default function App() {
   const [footerData, setFooterData] = useState({
     bgImage: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1974&auto=format&fit=crop'
   });
+
+  const [photoStripData, setPhotoStripData] = useState([
+    { year: 'Qatar · 2022', title: 'World Cup Glory', icon: <Globe className="w-10 h-10 text-albi opacity-30" />, image: '' },
+    { year: 'Paris · 2023', title: '8th Ballon d\'Or', icon: <Star className="w-10 h-10 text-gold opacity-30" />, image: '' },
+    { year: 'Berlin · 2015', title: 'UCL Treble', icon: <Trophy className="w-10 h-10 text-albi opacity-30" />, image: '' },
+    { year: 'Brazil · 2021', title: 'Copa América Win', icon: <Globe className="w-10 h-10 text-gold opacity-30" />, image: '' },
+    { year: 'Miami · 2023', title: 'MLS Debut', icon: <Star className="w-10 h-10 text-albi opacity-30" />, image: '' },
+    { year: 'Camp Nou · 2012', title: '91 Goals Season', icon: <Trophy className="w-10 h-10 text-gold opacity-30" />, image: '' },
+  ]);
+
+  const [socialPhotosData, setSocialPhotosData] = useState(['', '', '', '', '', '']);
 
   const handleLogoClick = () => {
     setClickCount(prev => {
@@ -491,9 +551,26 @@ export default function App() {
         <Hero {...heroData} />
         <div className="h-[3px] bg-gradient-to-r from-albi via-white to-albi" />
         <Marquee />
-        <Story />
-        <PhotoStrip />
-        <StatsRow />
+        
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <Story />
+        </motion.div>
+
+        <PhotoStrip photos={photoStripData} />
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <StatsRow />
+        </motion.div>
         
         <div className="bg-black text-center py-32 px-6 md:px-12">
           <motion.blockquote 
@@ -511,10 +588,34 @@ export default function App() {
           <cite className="text-[0.6rem] tracking-[0.25em] uppercase text-gray">{quoteData.attr}</cite>
         </div>
 
-        <Trophies />
-        <Timeline />
-        <Partners />
-        <Social />
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <Trophies />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <Timeline />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1 }}
+        >
+          <Partners />
+        </motion.div>
+
+        <Social photos={socialPhotosData} />
       </main>
 
       <Footer bgImage={footerData.bgImage} />
@@ -530,6 +631,10 @@ export default function App() {
             setQuoteData={setQuoteData} 
             footerData={footerData}
             setFooterData={setFooterData}
+            photoStripData={photoStripData}
+            setPhotoStripData={setPhotoStripData}
+            socialPhotosData={socialPhotosData}
+            setSocialPhotosData={setSocialPhotosData}
           />
         )}
       </AnimatePresence>
