@@ -37,6 +37,16 @@ interface AdminPanelProps {
   setPhotoStripData: (data: any[]) => void;
   socialPhotosData: string[];
   setSocialPhotosData: (data: string[]) => void;
+  trophiesData: any[];
+  setTrophiesData: (data: any[]) => void;
+  timelineData: any[];
+  setTimelineData: (data: any[]) => void;
+  statsData: any[];
+  setStatsData: (data: any[]) => void;
+  seoData: any;
+  setSeoData: (data: any) => void;
+  achievementsData: any[];
+  setAchievementsData: (data: any[]) => void;
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ 
@@ -51,7 +61,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   photoStripData,
   setPhotoStripData,
   socialPhotosData,
-  setSocialPhotosData
+  setSocialPhotosData,
+  trophiesData,
+  setTrophiesData,
+  timelineData,
+  setTimelineData,
+  statsData,
+  setStatsData,
+  seoData,
+  setSeoData,
+  achievementsData,
+  setAchievementsData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -101,7 +121,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     { id: 'hero', label: 'Hero Section', icon: <Type size={14} /> },
     { id: 'story', label: 'Story / Bio', icon: <BookOpen size={14} /> },
     { id: 'photos', label: 'Photo Strip', icon: <ImageIcon size={14} /> },
-    { id: 'trophies', label: 'Trophy Cabinet', icon: <Trophy size={14} /> },
+    { id: 'trophies', label: 'Honours & Trophies', icon: <Trophy size={14} /> },
+    { id: 'achievements', label: 'Individual Awards', icon: <Star size={14} /> },
     { id: 'timeline', label: 'Career Timeline', icon: <History size={14} /> },
     { id: 'stats', label: 'Stats Bar', icon: <BarChart3 size={14} /> },
     { id: 'partners', label: 'Partners & Brands', icon: <Users size={14} /> },
@@ -502,6 +523,350 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 ))}
               </motion.div>
+            )}
+            {activeTab === 'trophies' && (
+              <motion.div 
+                key="trophies"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="admin-label text-gold">Trophy Cabinet</h3>
+                  <button 
+                    onClick={() => setTrophiesData([...trophiesData, { count: '0', name: 'New Trophy', desc: 'Description', icon: '🏆' }])}
+                    className="bg-gold/10 text-gold border border-gold/20 px-4 py-2 text-[0.6rem] tracking-widest uppercase hover:bg-gold/20 transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={12} /> Add Trophy
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {trophiesData.map((trophy, i) => (
+                    <div key={i} className="admin-card relative group">
+                      <button 
+                        onClick={() => setTrophiesData(trophiesData.filter((_, index) => index !== i))}
+                        className="absolute top-4 right-4 text-red/40 hover:text-red transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <div className="grid gap-4">
+                        <div className="grid grid-cols-[80px_1fr] gap-4">
+                          <div className="admin-field">
+                            <label className="admin-label">Count</label>
+                            <input 
+                              type="text" 
+                              value={trophy.count}
+                              onChange={(e) => {
+                                const newData = [...trophiesData];
+                                newData[i] = { ...newData[i], count: e.target.value };
+                                setTrophiesData(newData);
+                              }}
+                              className="admin-input" 
+                            />
+                          </div>
+                          <div className="admin-field">
+                            <label className="admin-label">Icon (Emoji)</label>
+                            <input 
+                              type="text" 
+                              value={trophy.icon}
+                              onChange={(e) => {
+                                const newData = [...trophiesData];
+                                newData[i] = { ...newData[i], icon: e.target.value };
+                                setTrophiesData(newData);
+                              }}
+                              className="admin-input" 
+                            />
+                          </div>
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Trophy Name</label>
+                          <input 
+                            type="text" 
+                            value={trophy.name}
+                            onChange={(e) => {
+                              const newData = [...trophiesData];
+                              newData[i] = { ...newData[i], name: e.target.value };
+                              setTrophiesData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Description / Years</label>
+                          <textarea 
+                            rows={2}
+                            value={trophy.desc}
+                            onChange={(e) => {
+                              const newData = [...trophiesData];
+                              newData[i] = { ...newData[i], desc: e.target.value };
+                              setTrophiesData(newData);
+                            }}
+                            className="admin-input resize-none" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'timeline' && (
+              <motion.div 
+                key="timeline"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="admin-label text-gold">Career Timeline</h3>
+                  <button 
+                    onClick={() => setTimelineData([...timelineData, { year: '2024', event: 'New Event', club: 'Club Name' }])}
+                    className="bg-gold/10 text-gold border border-gold/20 px-4 py-2 text-[0.6rem] tracking-widest uppercase hover:bg-gold/20 transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={12} /> Add Event
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {timelineData.map((item, i) => (
+                    <div key={i} className="admin-card relative group">
+                      <button 
+                        onClick={() => setTimelineData(timelineData.filter((_, index) => index !== i))}
+                        className="absolute top-4 right-4 text-red/40 hover:text-red transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <div className="grid grid-cols-[100px_1fr_200px] gap-6">
+                        <div className="admin-field">
+                          <label className="admin-label">Year</label>
+                          <input 
+                            type="text" 
+                            value={item.year}
+                            onChange={(e) => {
+                              const newData = [...timelineData];
+                              newData[i] = { ...newData[i], year: e.target.value };
+                              setTimelineData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Event Description</label>
+                          <input 
+                            type="text" 
+                            value={item.event}
+                            onChange={(e) => {
+                              const newData = [...timelineData];
+                              newData[i] = { ...newData[i], event: e.target.value };
+                              setTimelineData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Club / Context</label>
+                          <input 
+                            type="text" 
+                            value={item.club}
+                            onChange={(e) => {
+                              const newData = [...timelineData];
+                              newData[i] = { ...newData[i], club: e.target.value };
+                              setTimelineData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'stats' && (
+              <motion.div 
+                key="stats"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="admin-label text-gold">Career Goals & Assists (Stats Bar)</h3>
+                  <button 
+                    onClick={() => setStatsData([...statsData, { num: '0', label: 'New Stat' }])}
+                    className="bg-gold/10 text-gold border border-gold/20 px-4 py-2 text-[0.6rem] tracking-widest uppercase hover:bg-gold/20 transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={12} /> Add Stat
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {statsData.map((stat, i) => (
+                    <div key={i} className="admin-card relative group">
+                      <button 
+                        onClick={() => setStatsData(statsData.filter((_, index) => index !== i))}
+                        className="absolute top-4 right-4 text-red/40 hover:text-red transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <div className="space-y-4">
+                        <div className="admin-field">
+                          <label className="admin-label">Value (Number)</label>
+                          <input 
+                            type="text" 
+                            value={stat.num}
+                            onChange={(e) => {
+                              const newData = [...statsData];
+                              newData[i] = { ...newData[i], num: e.target.value };
+                              setStatsData(newData);
+                            }}
+                            className="admin-input text-xl text-gold font-anton" 
+                          />
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Label</label>
+                          <input 
+                            type="text" 
+                            value={stat.label}
+                            onChange={(e) => {
+                              const newData = [...statsData];
+                              newData[i] = { ...newData[i], label: e.target.value };
+                              setStatsData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'seo' && (
+              <motion.div 
+                key="seo"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-2xl space-y-6"
+              >
+                <div className="admin-card">
+                  <h3 className="admin-label text-gold mb-6">Search Engine Optimization</h3>
+                  <div className="space-y-6">
+                    <div className="admin-field">
+                      <label className="admin-label">Meta Title</label>
+                      <input 
+                        type="text" 
+                        value={seoData.title}
+                        onChange={(e) => setSeoData({ ...seoData, title: e.target.value })}
+                        className="admin-input" 
+                      />
+                      <p className="text-[0.5rem] text-gray mt-1">Appears in browser tabs and search results.</p>
+                    </div>
+                    <div className="admin-field">
+                      <label className="admin-label">Meta Description</label>
+                      <textarea 
+                        rows={3}
+                        value={seoData.description}
+                        onChange={(e) => setSeoData({ ...seoData, description: e.target.value })}
+                        className="admin-input resize-none" 
+                      />
+                      <p className="text-[0.5rem] text-gray mt-1">Short summary for search engines.</p>
+                    </div>
+                    <div className="admin-field">
+                      <label className="admin-label">Keywords</label>
+                      <input 
+                        type="text" 
+                        value={seoData.keywords}
+                        onChange={(e) => setSeoData({ ...seoData, keywords: e.target.value })}
+                        className="admin-input" 
+                      />
+                      <p className="text-[0.5rem] text-gray mt-1">Comma separated (e.g. Messi, Football, GOAT).</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'achievements' && (
+              <motion.div 
+                key="achievements"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="admin-label text-gold">Individual Achievements</h3>
+                  <button 
+                    onClick={() => setAchievementsData([...achievementsData, { year: '2024', title: 'New Award', desc: 'Description' }])}
+                    className="bg-gold/10 text-gold border border-gold/20 px-4 py-2 text-[0.6rem] tracking-widest uppercase hover:bg-gold/20 transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={12} /> Add Achievement
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {achievementsData.map((item, i) => (
+                    <div key={i} className="admin-card relative group">
+                      <button 
+                        onClick={() => setAchievementsData(achievementsData.filter((_, index) => index !== i))}
+                        className="absolute top-4 right-4 text-red/40 hover:text-red transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <div className="grid grid-cols-[100px_1fr] gap-6">
+                        <div className="admin-field">
+                          <label className="admin-label">Year</label>
+                          <input 
+                            type="text" 
+                            value={item.year}
+                            onChange={(e) => {
+                              const newData = [...achievementsData];
+                              newData[i] = { ...newData[i], year: e.target.value };
+                              setAchievementsData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                        <div className="space-y-4">
+                          <div className="admin-field">
+                            <label className="admin-label">Award Title</label>
+                            <input 
+                              type="text" 
+                              value={item.title}
+                              onChange={(e) => {
+                                const newData = [...achievementsData];
+                                newData[i] = { ...newData[i], title: e.target.value };
+                                setAchievementsData(newData);
+                              }}
+                              className="admin-input" 
+                            />
+                          </div>
+                          <div className="admin-field">
+                            <label className="admin-label">Description</label>
+                            <textarea 
+                              rows={2}
+                              value={item.desc}
+                              onChange={(e) => {
+                                const newData = [...achievementsData];
+                                newData[i] = { ...newData[i], desc: e.target.value };
+                                setAchievementsData(newData);
+                              }}
+                              className="admin-input resize-none" 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Placeholder for other tabs */}
+            {!['dashboard', 'hero', 'story', 'nav-footer', 'photos', 'social', 'trophies', 'achievements', 'timeline', 'stats', 'seo'].includes(activeTab) && (
+              <div className="flex flex-col items-center justify-center h-64 text-gray">
+                <Settings size={48} className="opacity-10 mb-4 animate-spin-slow" />
+                <p className="text-[0.7rem] tracking-widest uppercase">This section is ready for content integration</p>
+              </div>
             )}
           </AnimatePresence>
         </div>

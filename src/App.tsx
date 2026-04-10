@@ -178,13 +178,13 @@ const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, ta
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-anton text-5xl sm:text-7xl md:text-[12vw] lg:text-[14rem] leading-[0.88] tracking-tight uppercase mb-6 md:mb-8"
+          className="font-anton text-5xl sm:text-7xl md:text-[12vw] lg:text-[14rem] leading-[0.88] tracking-tight uppercase mt-0 p-0 mb-4 ml-[-15px]"
         >
           {name1}
           <span className="block text-albi">{name2}</span>
         </motion.h1>
         
-        <p className="text-[0.6rem] md:text-[0.7rem] tracking-[0.2em] uppercase text-gray mb-8 md:mb-12">
+        <p className="text-[0.6rem] md:text-[0.7rem] tracking-[0.2em] uppercase text-gray mt-[-6px] mb-0">
           The Greatest of All Time · Rosario, Argentina · Born 1987
         </p>
         
@@ -297,16 +297,10 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
   );
 };
 
-const StatsRow = () => (
+const StatsRow = ({ stats }: { stats: any[] }) => (
   <div className="bg-albi-deep px-6 md:px-12 py-16 grid grid-cols-2 md:grid-cols-5 border-y-[3px] border-gold">
-    {[
-      { num: '8', label: "Ballon d'Or Awards" },
-      { num: '1,074', label: 'Career Goals' },
-      { num: '45', label: 'Club Trophies' },
-      { num: '3', label: 'Copa América Titles' },
-      { num: '1', label: 'World Cup Winner' }
-    ].map((stat, i) => (
-      <div key={i} className={`text-center p-6 ${i !== 4 ? 'md:border-r border-white/10' : ''}`}>
+    {stats.map((stat, i) => (
+      <div key={i} className={`text-center p-6 ${i !== stats.length - 1 ? 'md:border-r border-white/10' : ''}`}>
         <div className="font-anton text-5xl text-gold leading-none mb-2">{stat.num}</div>
         <div className="text-[0.55rem] tracking-[0.2em] uppercase text-white/70">{stat.label}</div>
       </div>
@@ -314,7 +308,7 @@ const StatsRow = () => (
   </div>
 );
 
-const Trophies = () => (
+const Trophies = ({ trophies }: { trophies: any[] }) => (
   <section id="trophies" className="bg-dark px-6 md:px-12 py-32">
     <div className="grid md:grid-cols-2 gap-16 items-end mb-20">
       <div>
@@ -327,16 +321,7 @@ const Trophies = () => (
       <p className="text-[0.8rem] text-gray leading-[2]">From Argentina to Spain to Paris to Miami — every chapter of Messi's career has been defined by silverware. A collection no player in history can match.</p>
     </div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-albi/10">
-      {[
-        { count: '8×', name: "Ballon d'Or", desc: "2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023", icon: "⭐" },
-        { count: '1×', name: "FIFA World Cup", desc: "Qatar 2022 — Player of the Tournament", icon: "🏆" },
-        { count: '3×', name: "Copa América", desc: "2021 (Brazil), 2024 (USA), 2019 (runner-up)", icon: "🥇" },
-        { count: '4×', name: "Champions League", desc: "2006, 2009, 2011, 2015 with FC Barcelona", icon: "🏅" },
-        { count: '10×', name: "La Liga", desc: "All 10 titles won with FC Barcelona", icon: "🇪🇸" },
-        { count: '7×', name: "Copa del Rey", desc: "Spain's domestic cup — FC Barcelona era", icon: "🏟" },
-        { count: '3×', name: "Club World Cup", desc: "FIFA Club World Cup champion", icon: "🌍" },
-        { count: '6×', name: "European Golden Shoe", desc: "Top scorer in European leagues — record 6 times", icon: "⚽" }
-      ].map((trophy, i) => (
+      {trophies.map((trophy, i) => (
         <div key={i} className="bg-dark p-8 relative group hover:bg-mid transition-colors">
           <div className="absolute top-6 right-6 text-2xl opacity-15">{trophy.icon}</div>
           <div className="font-anton text-6xl text-gold leading-none mb-2">{trophy.count}</div>
@@ -348,7 +333,26 @@ const Trophies = () => (
   </section>
 );
 
-const Timeline = () => (
+const Achievements = ({ achievements }: { achievements: any[] }) => (
+  <section id="achievements" className="bg-mid px-6 md:px-12 py-32">
+    <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
+      <div className="w-8 h-px bg-gold" />
+      Individual Awards
+    </div>
+    <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">Personal<br/>Milestones</h2>
+    <div className="grid md:grid-cols-3 gap-8">
+      {achievements.map((item, i) => (
+        <div key={i} className="bg-dark/50 p-8 border border-white/5 hover:border-gold/30 transition-colors">
+          <div className="text-gold font-anton text-2xl mb-2">{item.year}</div>
+          <div className="text-white font-anton text-xl uppercase tracking-tight mb-4">{item.title}</div>
+          <p className="text-[0.7rem] text-gray leading-relaxed">{item.desc}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+const Timeline = ({ timeline }: { timeline: any[] }) => (
   <section id="career" className="bg-black px-6 md:px-12 py-32">
     <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
       <div className="w-8 h-px bg-gold" />
@@ -357,15 +361,7 @@ const Timeline = () => (
     <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">Career<br/>Timeline</h2>
     <div className="relative pl-0 sm:pl-32">
       <div className="absolute left-4 sm:left-[8.5rem] top-0 bottom-0 w-px bg-gradient-to-b from-gold to-gold/10" />
-      {[
-        { year: '2000', event: 'Signs with FC Barcelona aged 13 — legendary napkin contract', club: 'FC Barcelona Youth Academy' },
-        { year: '2004', event: 'Liga debut at 17 — becomes youngest Barça player at the time', club: 'FC Barcelona' },
-        { year: '2009', event: 'First Ballon d\'Or · Champions League · Treble season under Pep Guardiola', club: 'FC Barcelona' },
-        { year: '2012', event: 'Records 91 goals in a single calendar year — a world record', club: 'FC Barcelona' },
-        { year: '2021', event: 'Signs for Paris Saint-Germain · Wins Copa América with Argentina', club: 'PSG · Argentina' },
-        { year: '2022', event: 'Wins the FIFA World Cup in Qatar · Named Player of the Tournament', club: 'Argentina National Team' },
-        { year: '2023', event: 'Joins Inter Miami CF · Wins 8th Ballon d\'Or · Leagues Cup champion', club: 'Inter Miami CF · MLS' }
-      ].map((item, i) => (
+      {timeline.map((item, i) => (
         <div key={i} className="grid grid-cols-[4rem_1fr] sm:grid-cols-[8rem_1fr] gap-6 sm:gap-12 pb-12 relative">
           <div className="absolute left-4 sm:left-[8.5rem] -translate-x-1/2 top-1 w-2.5 h-2.5 rounded-full bg-gold border-2 border-black" />
           <div className="font-anton text-lg sm:text-xl text-gold tracking-widest text-left sm:text-right pr-0 sm:pr-8">{item.year}</div>
@@ -521,7 +517,65 @@ export default function App() {
     { year: 'Camp Nou · 2012', title: '91 Goals Season', icon: <Trophy className="w-10 h-10 text-gold opacity-30" />, image: '' },
   ]);
 
+  const [trophiesData, setTrophiesData] = useState([
+    { count: '8×', name: "Ballon d'Or", desc: "2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023", icon: "⭐" },
+    { count: '1×', name: "FIFA World Cup", desc: "Qatar 2022 — Player of the Tournament", icon: "🏆" },
+    { count: '3×', name: "Copa América", desc: "2021 (Brazil), 2024 (USA), 2019 (runner-up)", icon: "🥇" },
+    { count: '4×', name: "Champions League", desc: "2006, 2009, 2011, 2015 with FC Barcelona", icon: "🏅" },
+    { count: '10×', name: "La Liga", desc: "All 10 titles won with FC Barcelona", icon: "🇪🇸" },
+    { count: '7×', name: "Copa del Rey", desc: "Spain's domestic cup — FC Barcelona era", icon: "🏟" },
+    { count: '3×', name: "Club World Cup", desc: "FIFA Club World Cup champion", icon: "🌍" },
+    { count: '6×', name: "European Golden Shoe", desc: "Top scorer in European leagues — record 6 times", icon: "⚽" }
+  ]);
+
+  const [timelineData, setTimelineData] = useState([
+    { year: '2000', event: 'Signs with FC Barcelona aged 13 — legendary napkin contract', club: 'FC Barcelona Youth Academy' },
+    { year: '2004', event: 'Liga debut at 17 — becomes youngest Barça player at the time', club: 'FC Barcelona' },
+    { year: '2009', event: 'First Ballon d\'Or · Champions League · Treble season under Pep Guardiola', club: 'FC Barcelona' },
+    { year: '2012', event: 'Records 91 goals in a single calendar year — a world record', club: 'FC Barcelona' },
+    { year: '2021', event: 'Signs for Paris Saint-Germain · Wins Copa América with Argentina', club: 'PSG · Argentina' },
+    { year: '2022', event: 'Wins the FIFA World Cup in Qatar · Named Player of the Tournament', club: 'Argentina National Team' },
+    { year: '2023', event: 'Joins Inter Miami CF · Wins 8th Ballon d\'Or · Leagues Cup champion', club: 'Inter Miami CF · MLS' }
+  ]);
+
+  const [statsData, setStatsData] = useState([
+    { num: '8', label: "Ballon d'Or Awards" },
+    { num: '1,074', label: 'Career Goals' },
+    { num: '45', label: 'Club Trophies' },
+    { num: '3', label: 'Copa América Titles' },
+    { num: '1', label: 'World Cup Winner' }
+  ]);
+
+  const [seoData, setSeoData] = useState({
+    title: 'Lionel Messi | Official Portfolio',
+    description: 'The official portfolio of the Greatest of All Time, Lionel Messi.',
+    keywords: 'Messi, Football, GOAT, Barcelona, Argentina, Inter Miami'
+  });
+
+  const [achievementsData, setAchievementsData] = useState([
+    { year: '2023', title: "Ballon d'Or #8", desc: "Record-extending eighth award after World Cup win." },
+    { year: '2022', title: "World Cup Golden Ball", desc: "Best player of the FIFA World Cup 2022." },
+    { year: '2012', title: "Guinness World Record", desc: "91 goals in a single calendar year." }
+  ]);
+
   const [socialPhotosData, setSocialPhotosData] = useState(['', '', '', '', '', '']);
+
+  // Update SEO Meta Tags
+  useEffect(() => {
+    document.title = seoData.title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', seoData.description);
+    
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (metaKeywords) {
+      metaKeywords.setAttribute('content', seoData.keywords);
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = "keywords";
+      meta.content = seoData.keywords;
+      document.head.appendChild(meta);
+    }
+  }, [seoData]);
 
   const handleLogoClick = () => {
     setClickCount(prev => {
@@ -569,7 +623,7 @@ export default function App() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
-          <StatsRow />
+          <StatsRow stats={statsData} />
         </motion.div>
         
         <div className="bg-black text-center py-32 px-6 md:px-12">
@@ -594,7 +648,16 @@ export default function App() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
-          <Trophies />
+          <Trophies trophies={trophiesData} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <Achievements achievements={achievementsData} />
         </motion.div>
 
         <motion.div
@@ -603,7 +666,7 @@ export default function App() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
-          <Timeline />
+          <Timeline timeline={timelineData} />
         </motion.div>
 
         <motion.div
@@ -635,6 +698,16 @@ export default function App() {
             setPhotoStripData={setPhotoStripData}
             socialPhotosData={socialPhotosData}
             setSocialPhotosData={setSocialPhotosData}
+            trophiesData={trophiesData}
+            setTrophiesData={setTrophiesData}
+            timelineData={timelineData}
+            setTimelineData={setTimelineData}
+            statsData={statsData}
+            setStatsData={setStatsData}
+            seoData={seoData}
+            setSeoData={setSeoData}
+            achievementsData={achievementsData}
+            setAchievementsData={setAchievementsData}
           />
         )}
       </AnimatePresence>
