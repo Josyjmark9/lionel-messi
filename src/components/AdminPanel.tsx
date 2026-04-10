@@ -75,13 +75,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'footer') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'footer' | 'profile') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (type === 'hero') {
           setHeroData({ ...heroData, bgImage: reader.result as string });
+        } else if (type === 'profile') {
+          setHeroData({ ...heroData, profileImage: reader.result as string });
         } else {
           setFooterData({ ...footerData, bgImage: reader.result as string });
         }
@@ -351,6 +353,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="url" 
                         value={heroData.bgImage || ''}
                         onChange={(e) => setHeroData({ ...heroData, bgImage: e.target.value })}
+                        placeholder="https://..." 
+                        className="admin-input" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-card">
+                    <h3 className="admin-label text-gold mb-6">Profile Image (Transparent BG)</h3>
+                    <p className="text-[0.55rem] text-gray mb-4 italic">This image appears in the center of the hero section, behind the stats but in front of the scrolling name.</p>
+                    <div className="admin-img-slot relative overflow-hidden group">
+                      {heroData.profileImage ? (
+                        <img src={heroData.profileImage} alt="Profile" className="w-full h-full object-contain opacity-50" />
+                      ) : (
+                        <>
+                          <Plus size={20} className="opacity-40" />
+                          <span>Transparent BG Photo</span>
+                        </>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'profile')}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </div>
+                    <div className="admin-field mt-4">
+                      <label className="admin-label">Or paste image URL</label>
+                      <input 
+                        type="url" 
+                        value={heroData.profileImage || ''}
+                        onChange={(e) => setHeroData({ ...heroData, profileImage: e.target.value })}
                         placeholder="https://..." 
                         className="admin-input" 
                       />
@@ -699,7 +732,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <Plus size={12} /> Add Stat
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   {statsData.map((stat, i) => (
                     <div key={i} className="admin-card relative group">
                       <button 
@@ -709,18 +742,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Trash2 size={14} />
                       </button>
                       <div className="space-y-4">
-                        <div className="admin-field">
-                          <label className="admin-label">Value (Number)</label>
-                          <input 
-                            type="text" 
-                            value={stat.num}
-                            onChange={(e) => {
-                              const newData = [...statsData];
-                              newData[i] = { ...newData[i], num: e.target.value };
-                              setStatsData(newData);
-                            }}
-                            className="admin-input text-xl text-gold font-anton" 
-                          />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="admin-field">
+                            <label className="admin-label">Value (Number)</label>
+                            <input 
+                              type="text" 
+                              value={stat.num}
+                              onChange={(e) => {
+                                const newData = [...statsData];
+                                newData[i] = { ...newData[i], num: e.target.value };
+                                setStatsData(newData);
+                              }}
+                              className="admin-input text-xl text-gold font-anton" 
+                            />
+                          </div>
+                          <div className="admin-field">
+                            <label className="admin-label">Group</label>
+                            <select 
+                              value={stat.group || 'Total'}
+                              onChange={(e) => {
+                                const newData = [...statsData];
+                                newData[i] = { ...newData[i], group: e.target.value };
+                                setStatsData(newData);
+                              }}
+                              className="admin-input"
+                            >
+                              <option value="Total">Total</option>
+                              <option value="Clubs & Country">Clubs & Country</option>
+                              <option value="World Cup">World Cup</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
                         </div>
                         <div className="admin-field">
                           <label className="admin-label">Label</label>

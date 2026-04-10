@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { 
   Trophy, 
   Star, 
@@ -151,11 +151,39 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
   );
 };
 
-const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, tag: string, bgImage?: string }) => {
-  const nameArray1 = name1.split('');
-  const nameArray2 = name2.split('');
+const Counter = ({ value, duration = 2, delay = 0 }: { value: string, duration?: number, delay?: number }) => {
+  const [count, setCount] = useState(0);
+  const target = parseInt(value.replace(/,/g, '')) || 0;
+  const isAward = value.includes('×');
+  const suffix = isAward ? '×' : '';
+
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    
+    const timeout = setTimeout(() => {
+      window.requestAnimationFrame(step);
+    }, delay * 1000);
+
+    return () => clearTimeout(timeout);
+  }, [target, duration, delay]);
+
+  return <span>{count.toLocaleString()}{suffix}</span>;
+};
+
+const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: string, name2: string, tag: string, bgImage?: string, profileImage?: string, stats: any[] }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const particles = Array.from({ length: 20 });
+  const { scrollY } = useScroll();
+  const profileOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  const profileScale = useTransform(scrollY, [0, 500], [1, 0.8]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -168,24 +196,35 @@ const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, ta
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Group stats by their group property
+  const groupedStats = stats.reduce((acc: any, stat: any) => {
+    const group = stat.group || 'Other';
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(stat);
+    return acc;
+  }, {});
+
+  const fullName = `${name1} ${name2} `.repeat(10);
+
   return (
-    <section className="relative h-screen flex items-end overflow-hidden">
-      {/* Background Image with Parallax */}
+    <section className="relative h-screen flex items-center justify-center overflow-hidden group/hero">
+      {/* Background Image with Parallax and Dim Effect */}
       <motion.div 
-        initial={{ scale: 1.2, opacity: 0 }}
+        initial={{ scale: 1.1, opacity: 0 }}
         animate={{ 
           scale: 1, 
-          opacity: 0.4,
-          x: -mousePos.x,
-          y: -mousePos.y
+          opacity: 0.25,
+          x: -mousePos.x * 0.5,
+          y: -mousePos.y * 0.5
         }}
+        whileHover={{ opacity: 0.4 }}
         transition={{ 
           scale: { duration: 2.5, ease: [0.22, 1, 0.36, 1] },
-          opacity: { duration: 2.5 },
+          opacity: { duration: 1 },
           x: { type: "spring", stiffness: 50, damping: 30 },
           y: { type: "spring", stiffness: 50, damping: 30 }
         }}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 grayscale hover:grayscale-0 transition-all duration-1000"
       >
         {bgImage ? (
           <img 
@@ -197,152 +236,155 @@ const Hero = ({ name1, name2, tag, bgImage }: { name1: string, name2: string, ta
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(116,172,223,0.12)_0%,transparent_60%),radial-gradient(ellipse_at_80%_80%,rgba(201,168,76,0.08)_0%,transparent_50%),linear-gradient(135deg,#0A0A0A_0%,#111520_50%,#0A0A0A_100%)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
       </motion.div>
 
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_48px,rgba(116,172,223,0.025)_48px,rgba(116,172,223,0.025)_50px)] pointer-events-none" />
+      {/* Grid Lines with Hover Effect */}
+      <motion.div 
+        animate={{ opacity: [0.02, 0.05, 0.02] }}
+        transition={{ duration: 4, repeat: Infinity }}
+        className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_48px,rgba(116,172,223,0.1)_48px,rgba(116,172,223,0.1)_50px)] pointer-events-none group-hover/hero:opacity-20 transition-opacity duration-500" 
+      />
       
-      {/* Particles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {particles.map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ 
-              x: Math.random() * 100 + "%", 
-              y: Math.random() * 100 + "%",
-              opacity: Math.random() * 0.5
-            }}
-            animate={{ 
-              y: [null, "-100%"],
-              opacity: [0, 0.5, 0]
-            }}
-            transition={{ 
-              duration: Math.random() * 10 + 10, 
-              repeat: Infinity, 
-              ease: "linear",
-              delay: Math.random() * 10
-            }}
-            className="absolute w-1 h-1 bg-gold rounded-full blur-[1px]"
-          />
-        ))}
+      {/* Scrolling Name (Background Layer) */}
+      <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none z-1 opacity-10">
+        <motion.div 
+          animate={{ x: [0, -2000] }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          className="whitespace-nowrap font-anton text-[30vw] uppercase text-transparent tracking-tighter"
+          style={{ WebkitTextStroke: '3px rgba(116,172,223,0.2)' }}
+        >
+          {fullName}
+        </motion.div>
       </div>
-      
+
+      {/* Background "10" (Now above profile) */}
       <motion.div 
         initial={{ opacity: 0, x: 100 }}
         animate={{ 
-          opacity: 1, 
+          opacity: 0.15, 
           x: mousePos.x * 2,
           y: [0, -20, 0]
         }}
+        whileHover={{ opacity: 0.3, scale: 1.05, filter: "brightness(1.5)" }}
         transition={{ 
           opacity: { duration: 1.5 },
           x: { type: "spring", stiffness: 50, damping: 30 },
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
         }}
-        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[15rem] sm:text-[20rem] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-0" 
-        style={{ WebkitTextStroke: '1px rgba(116,172,223,0.12)' }}
+        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[30vw] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-15" 
+        style={{ WebkitTextStroke: '1px rgba(116,172,223,0.3)' }}
       >
         10
       </motion.div>
-      
-      <div className="relative z-10 px-6 md:px-12 pb-12 md:pb-20 w-full">
+
+      {/* Profile Image (Middle Layer) */}
+      {profileImage && (
         <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex items-center gap-4 mb-4 md:mb-6 text-[0.5rem] md:text-[0.6rem] tracking-[0.3em] uppercase text-gold"
+          style={{ opacity: profileOpacity, scale: profileScale }}
+          className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto cursor-pointer group/profile"
         >
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: 40 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="h-px bg-gold" 
+          <motion.img 
+            src={profileImage} 
+            alt="Messi Profile" 
+            whileHover={{ 
+              scale: 1.08, 
+              filter: "brightness(1.3) drop-shadow(0 0 50px rgba(201,168,76,0.8))",
+              rotate: [0, -1, 1, -1, 0],
+            }}
+            transition={{ rotate: { duration: 0.5, repeat: Infinity } }}
+            className="h-[85%] md:h-[95%] object-contain drop-shadow-[0_0_60px_rgba(201,168,76,0.4)] transition-all duration-500"
+            referrerPolicy="no-referrer"
           />
-          {tag}
+          {/* Crazy Aura Effect */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.15)_0%,transparent_70%)] opacity-0 group-hover/profile:opacity-100 transition-opacity duration-700 pointer-events-none" />
         </motion.div>
-        
-        <div className="font-anton text-5xl sm:text-7xl md:text-[12vw] lg:text-[14rem] leading-[0.88] tracking-tight uppercase mt-0 p-0 mb-4 ml-[-15px] cursor-default">
-          <div className="flex flex-wrap overflow-hidden">
-            {nameArray1.map((char, i) => (
-              <motion.span
-                key={i}
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.8, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  color: "#C9A84C",
-                  textShadow: "0 0 20px rgba(201,168,76,0.5)",
-                  skewX: [0, -10, 10, 0],
-                  x: [0, -2, 2, 0],
-                  transition: { duration: 0.2, repeat: Infinity }
-                }}
-                className="inline-block"
+      )}
+      
+      {/* Content (Front Layer) */}
+      <div className="relative z-20 px-6 md:px-12 w-full h-full flex flex-col py-12 md:py-20">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="max-w-7xl mx-auto w-full">
+            {/* Foreground Name (Centered vertically in the middle area) */}
+            <div className="w-full font-anton text-6xl sm:text-8xl md:text-[10vw] lg:text-[15rem] leading-none uppercase cursor-default relative origin-center group-hover/hero:scale-x-[1.05] group-hover/hero:scale-y-[1.05] transition-all duration-700 ease-in-out">
+              <div className="flex justify-between w-full overflow-hidden group-hover/hero:text-gold transition-colors duration-500">
+                {(name1 + name2).split('').map((char, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ y: "100%", opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
+                    className="inline-block drop-shadow-[0_0_15px_rgba(201,168,76,0)] group-hover/hero:drop-shadow-[0_0_25px_rgba(201,168,76,0.4)]"
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+              </div>
+              {/* Decorative LEGENDARY text */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.08 }}
+                className="absolute -bottom-8 left-0 w-full flex justify-between font-sans font-thin text-[0.6rem] tracking-[2em] text-white pointer-events-none scale-x-[1.5] origin-left"
               >
-                {char === ' ' ? '\u00A0' : char}
-              </motion.span>
-            ))}
-          </div>
-          <div className="flex flex-wrap overflow-hidden text-albi">
-            {nameArray2.map((char, i) => (
-              <motion.span
-                key={i}
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5 + (0.05 * i), ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  color: "#C9A84C",
-                  textShadow: "0 0 20px rgba(201,168,76,0.5)",
-                  skewX: [0, -10, 10, 0],
-                  x: [0, -2, 2, 0],
-                  transition: { duration: 0.2, repeat: Infinity }
-                }}
-                className="inline-block"
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </motion.span>
-            ))}
+                {"LEGENDARY".split('').map((c, i) => <span key={i}>{c}</span>)}
+              </motion.div>
+            </div>
           </div>
         </div>
-        
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
-          className="text-[0.6rem] md:text-[0.7rem] tracking-[0.2em] uppercase text-gray mt-[-6px] mb-0"
-        >
-          The Greatest of All Time · Rosario, Argentina · Born 1987
-        </motion.p>
-        
-        <div className="flex flex-wrap gap-6 md:gap-12 mb-8 mt-8">
-          {[
-            { num: '8×', label: "Ballon d'Or" },
-            { num: '1', label: 'World Cup' },
-            { num: '4×', label: 'Champions League' },
-            { num: '672', label: 'La Liga Goals' }
-          ].map((stat, i) => (
+
+        <div className="max-w-7xl mx-auto w-full">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex items-center gap-4 mb-8 text-[0.5rem] md:text-[0.6rem] tracking-[0.3em] uppercase text-gold"
+          >
             <motion.div 
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
-                duration: 0.5, 
-                delay: 1.8 + (i * 0.1),
-                type: "spring",
-                stiffness: 200,
-                damping: 15
-              }}
-              whileHover={{ 
-                y: -10,
-                scale: 1.1,
-                transition: { duration: 0.2 }
-              }}
-            >
-              <div className="font-anton text-3xl md:text-4xl text-gold leading-none">{stat.num}</div>
-              <div className="text-[0.5rem] md:text-[0.55rem] tracking-[0.15em] uppercase text-gray mt-1">{stat.label}</div>
-            </motion.div>
-          ))}
+              initial={{ width: 0 }}
+              animate={{ width: 40 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="h-px bg-gold" 
+            />
+            {tag}
+          </motion.div>
+          
+          <div className="flex flex-wrap gap-x-16 gap-y-8">
+            {Object.entries(groupedStats).map(([group, groupStats]: [string, any], groupIdx) => (
+              <div key={group} className="space-y-3">
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 + (groupIdx * 0.2) }}
+                  className="text-[0.45rem] tracking-[0.3em] uppercase text-gold/60 flex items-center gap-2"
+                >
+                  {group}
+                  <div className="h-px w-8 bg-gold/10" />
+                </motion.div>
+                <div className="flex flex-wrap gap-x-8 gap-y-3">
+                  {groupStats.map((stat: any, i: number) => (
+                    <motion.div 
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.5, 
+                        delay: 1.4 + (groupIdx * 0.2) + (i * 0.1)
+                      }}
+                      className="min-w-[60px]"
+                    >
+                      <div className="font-anton text-xl md:text-2xl text-gold leading-none">
+                        <Counter 
+                          value={stat.num} 
+                          delay={1.5 + (groupIdx * 0.2) + (i * 0.1)} 
+                        />
+                      </div>
+                      <div className="text-[0.4rem] md:text-[0.45rem] tracking-[0.1em] uppercase text-gray mt-0.5">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -648,7 +690,8 @@ export default function App() {
     name1: 'Lionel',
     name2: 'Messi',
     tag: 'Inter Miami CF · Argentine National Team',
-    bgImage: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1974&auto=format&fit=crop'
+    bgImage: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1974&auto=format&fit=crop',
+    profileImage: 'https://www.pngall.com/wp-content/uploads/2016/05/Lionel-Messi-PNG-Image.png'
   });
 
   const [quoteData, setQuoteData] = useState({
@@ -691,11 +734,14 @@ export default function App() {
   ]);
 
   const [statsData, setStatsData] = useState([
-    { num: '8', label: "Ballon d'Or Awards" },
-    { num: '1,074', label: 'Career Goals' },
-    { num: '45', label: 'Club Trophies' },
-    { num: '3', label: 'Copa América Titles' },
-    { num: '1', label: 'World Cup Winner' }
+    { num: '1,074', label: 'Total Career Goals', group: 'Total' },
+    { num: '372', label: 'Total Career Assists', group: 'Total' },
+    { num: '109', label: 'Argentina Goals', group: 'Clubs & Country' },
+    { num: '672', label: 'Barcelona Goals', group: 'Clubs & Country' },
+    { num: '32', label: 'PSG Goals', group: 'Clubs & Country' },
+    { num: '25', label: 'Inter Miami Goals', group: 'Clubs & Country' },
+    { num: '13', label: 'World Cup Goals', group: 'World Cup' },
+    { num: '1', label: 'World Cup Trophy', group: 'World Cup' }
   ]);
 
   const [seoData, setSeoData] = useState({
@@ -755,15 +801,16 @@ export default function App() {
       <Navbar onLogoClick={handleLogoClick} />
       
       <main>
-        <Hero {...heroData} />
+        <Hero {...heroData} stats={statsData} />
         <div className="h-[3px] bg-gradient-to-r from-albi via-white to-albi" />
         <Marquee />
         
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
+          className="overflow-hidden"
         >
           <Story />
         </motion.div>
@@ -771,15 +818,21 @@ export default function App() {
         <PhotoStrip photos={photoStripData} />
         
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
           <StatsRow stats={statsData} />
         </motion.div>
         
-        <div className="bg-black text-center py-32 px-6 md:px-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="bg-black text-center py-32 px-6 md:px-12"
+        >
           <motion.blockquote 
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -793,12 +846,12 @@ export default function App() {
             ))}"
           </motion.blockquote>
           <cite className="text-[0.6rem] tracking-[0.25em] uppercase text-gray">{quoteData.attr}</cite>
-        </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
           <Trophies trophies={trophiesData} />
@@ -807,31 +860,38 @@ export default function App() {
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
           <Achievements achievements={achievementsData} />
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
           <Timeline timeline={timelineData} />
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1 }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
         >
           <Partners />
         </motion.div>
 
-        <Social photos={socialPhotosData} />
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <Social photos={socialPhotosData} />
+        </motion.div>
       </main>
 
       <Footer bgImage={footerData.bgImage} />
