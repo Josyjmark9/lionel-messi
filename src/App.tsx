@@ -1,0 +1,538 @@
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Trophy, 
+  Star, 
+  Globe, 
+  Settings, 
+  Instagram, 
+  Youtube, 
+  Twitter, 
+  Facebook,
+  Menu,
+  X,
+  Upload
+} from 'lucide-react';
+import AdminPanel from './components/AdminPanel';
+
+// --- Custom Cursor ---
+const CustomCursor = () => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [ringPos, setRingPos] = useState({ x: 0, y: 0 });
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    if (isTouch) return;
+    let frameId: number;
+    const animateRing = () => {
+      setRingPos(prev => ({
+        x: prev.x + (mousePos.x - prev.x - 18) * 0.12,
+        y: prev.y + (mousePos.y - prev.y - 18) * 0.12
+      }));
+      frameId = requestAnimationFrame(animateRing);
+    };
+    frameId = requestAnimationFrame(animateRing);
+    return () => cancelAnimationFrame(frameId);
+  }, [mousePos, isTouch]);
+
+  if (isTouch) return null;
+
+  return (
+    <>
+      <div 
+        className="fixed top-0 left-0 w-3 h-3 bg-gold rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100 hidden md:block"
+        style={{ transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)` }}
+      />
+      <div 
+        className="fixed top-0 left-0 w-9 h-9 border border-gold rounded-full pointer-events-none z-[9998] opacity-60 hidden md:block"
+        style={{ transform: `translate(${ringPos.x}px, ${ringPos.y}px)` }}
+      />
+    </>
+  );
+};
+
+// --- Components ---
+
+const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-6">
+      <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-transparent pointer-events-none" />
+      <button 
+        onClick={onLogoClick}
+        className="relative z-10 font-bebas text-2xl tracking-[0.2em] text-gold cursor-none hover:opacity-80 transition-opacity"
+      >
+        LM · 10
+      </button>
+      
+      {/* Desktop Menu */}
+      <ul className="relative z-10 hidden md:flex gap-10 list-none">
+        {['Story', 'On Pitch', 'Trophies', 'Career', 'Social'].map(item => (
+          <li key={item}>
+            <a href={`#${item.toLowerCase().replace(' ', '-')}`} className="text-[0.65rem] tracking-[0.2em] uppercase text-white/70 hover:text-gold transition-colors">
+              {item}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div className="relative z-10 flex items-center gap-6">
+        <a href="mailto:josiahjohnmark9@gmail.com" className="hidden sm:block text-[0.65rem] tracking-[0.15em] uppercase text-gold border border-gold/40 px-4 py-2 hover:bg-gold/10 transition-colors">
+          Inquiries
+        </a>
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden text-gold p-2"
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            className="fixed inset-0 bg-black z-40 flex flex-col items-center justify-center gap-8 md:hidden"
+          >
+            {['Story', 'On Pitch', 'Trophies', 'Career', 'Social'].map(item => (
+              <a 
+                key={item}
+                href={`#${item.toLowerCase().replace(' ', '-')}`} 
+                onClick={() => setIsMenuOpen(false)}
+                className="font-anton text-4xl uppercase tracking-tighter text-white hover:text-gold transition-colors"
+              >
+                {item}
+              </a>
+            ))}
+            <a href="mailto:josiahjohnmark9@gmail.com" className="mt-8 text-[0.8rem] tracking-[0.2em] uppercase text-gold border border-gold/40 px-8 py-4">
+              Business Enquiries
+            </a>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+};
+
+const Hero = ({ name1, name2, tag }: { name1: string, name2: string, tag: string }) => {
+  return (
+    <section className="relative h-screen flex items-end overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(116,172,223,0.12)_0%,transparent_60%),radial-gradient(ellipse_at_80%_80%,rgba(201,168,76,0.08)_0%,transparent_50%),linear-gradient(135deg,#0A0A0A_0%,#111520_50%,#0A0A0A_100%)]" />
+      <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_48px,rgba(116,172,223,0.025)_48px,rgba(116,172,223,0.025)_50px)]" />
+      <div className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[15rem] sm:text-[20rem] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none" style={{ WebkitTextStroke: '1px rgba(116,172,223,0.12)' }}>
+        10
+      </div>
+      
+      <div className="relative z-10 px-6 md:px-12 pb-12 md:pb-20 w-full">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex items-center gap-4 mb-4 md:mb-6 text-[0.5rem] md:text-[0.6rem] tracking-[0.3em] uppercase text-gold"
+        >
+          <div className="w-6 md:w-10 h-px bg-gold" />
+          {tag}
+        </motion.div>
+        
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="font-anton text-5xl sm:text-7xl md:text-[12vw] lg:text-[14rem] leading-[0.88] tracking-tight uppercase mb-6 md:mb-8"
+        >
+          {name1}
+          <span className="block text-albi">{name2}</span>
+        </motion.h1>
+        
+        <p className="text-[0.6rem] md:text-[0.7rem] tracking-[0.2em] uppercase text-gray mb-8 md:mb-12">
+          The Greatest of All Time · Rosario, Argentina · Born 1987
+        </p>
+        
+        <div className="flex flex-wrap gap-6 md:gap-12 mb-8">
+          {[
+            { num: '8×', label: "Ballon d'Or" },
+            { num: '1', label: 'World Cup' },
+            { num: '4×', label: 'Champions League' },
+            { num: '672', label: 'La Liga Goals' }
+          ].map(stat => (
+            <div key={stat.label}>
+              <div className="font-anton text-3xl md:text-4xl text-gold leading-none">{stat.num}</div>
+              <div className="text-[0.5rem] md:text-[0.55rem] tracking-[0.15em] uppercase text-gray mt-1">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute bottom-8 right-12 hidden md:flex flex-col items-center gap-2 text-[0.55rem] tracking-[0.2em] uppercase text-gray animate-pulse">
+        <div className="w-px h-[60px] bg-gradient-to-b from-gold to-transparent" />
+        Scroll
+      </div>
+    </section>
+  );
+};
+
+const Marquee = () => (
+  <div className="overflow-hidden py-8 bg-albi-deep border-y border-gold/30">
+    <motion.div 
+      animate={{ x: [0, -1000] }}
+      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      className="flex whitespace-nowrap"
+    >
+      {[...Array(10)].map((_, i) => (
+        <span key={i} className="font-bebas text-xl tracking-[0.2em] text-white/90 px-8">
+          Ballon d'Or <span className="text-gold px-2">★</span>
+          World Cup 2022 <span className="text-gold px-2">★</span>
+          Champions League <span className="text-gold px-2">★</span>
+          Copa América <span className="text-gold px-2">★</span>
+          La Liga <span className="text-gold px-2">★</span>
+          Greatest of All Time <span className="text-gold px-2">★</span>
+        </span>
+      ))}
+    </motion.div>
+  </div>
+);
+
+const Story = () => (
+  <section id="story" className="bg-dark px-6 md:px-12 py-32 grid md:grid-cols-2 gap-24 items-center">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
+        <div className="w-8 h-px bg-gold" />
+        His Story
+      </div>
+      <blockquote className="font-playfair text-3xl md:text-[2.8rem] leading-[1.3] italic text-white/90">
+        Redefining <span className="text-albi not-italic">limits</span>, carrying Argentina to the summit of <span className="text-albi not-italic">world football</span>, building a legacy that will outlive the game itself.
+      </blockquote>
+    </motion.div>
+    <div className="text-[0.8rem] leading-[2] text-gray tracking-wider space-y-6">
+      <p>Born on June 24, 1987 in Rosario, Santa Fe, Lionel Andrés Messi showed football genius from his very first touches. Diagnosed with a growth hormone deficiency at age 10, Barcelona saw enough to fund his treatment — and the rest became history.</p>
+      <p>At 17, he broke into Barça's first team. By 25, he had become the greatest scorer in football history. By 35, he had delivered the one thing that had eluded him — a FIFA World Cup, in Qatar 2022, cementing a legacy no one can dispute.</p>
+      <p>Now in Miami, a new chapter is being written. But the legend has long since been sealed.</p>
+    </div>
+  </section>
+);
+
+const PhotoStrip = () => {
+  const photos = [
+    { year: 'Qatar · 2022', title: 'World Cup Glory', icon: <Globe className="w-10 h-10 text-albi opacity-30" /> },
+    { year: 'Paris · 2023', title: '8th Ballon d\'Or', icon: <Star className="w-10 h-10 text-gold opacity-30" /> },
+    { year: 'Berlin · 2015', title: 'UCL Treble', icon: <Trophy className="w-10 h-10 text-albi opacity-30" /> },
+    { year: 'Brazil · 2021', title: 'Copa América Win', icon: <Globe className="w-10 h-10 text-gold opacity-30" /> },
+    { year: 'Miami · 2023', title: 'MLS Debut', icon: <Star className="w-10 h-10 text-albi opacity-30" /> },
+    { year: 'Camp Nou · 2012', title: '91 Goals Season', icon: <Trophy className="w-10 h-10 text-gold opacity-30" /> },
+  ];
+
+  return (
+    <div className="bg-black py-16 overflow-hidden">
+      <div className="px-6 md:px-12 mb-8 text-[0.6rem] tracking-[0.3em] uppercase text-gold">Career Moments</div>
+      <motion.div 
+        animate={{ x: [0, -1800] }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+        className="flex gap-6 w-max"
+      >
+        {[...photos, ...photos].map((photo, i) => (
+          <div key={i} className="relative w-[280px] h-[380px] bg-mid border border-albi/10 overflow-hidden group">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[0.6rem] tracking-widest uppercase text-albi/30">
+              {photo.icon}
+              <span className="text-center">{photo.title}<br/>Photo Slot</span>
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-5 flex flex-col justify-end">
+              <div className="text-[0.55rem] tracking-[0.2em] uppercase text-gold mb-1">{photo.year}</div>
+              <div className="font-anton text-lg tracking-wider uppercase">{photo.title}</div>
+            </div>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+};
+
+const StatsRow = () => (
+  <div className="bg-albi-deep px-6 md:px-12 py-16 grid grid-cols-2 md:grid-cols-5 border-y-[3px] border-gold">
+    {[
+      { num: '8', label: "Ballon d'Or Awards" },
+      { num: '1,074', label: 'Career Goals' },
+      { num: '45', label: 'Club Trophies' },
+      { num: '3', label: 'Copa América Titles' },
+      { num: '1', label: 'World Cup Winner' }
+    ].map((stat, i) => (
+      <div key={i} className={`text-center p-6 ${i !== 4 ? 'md:border-r border-white/10' : ''}`}>
+        <div className="font-anton text-5xl text-gold leading-none mb-2">{stat.num}</div>
+        <div className="text-[0.55rem] tracking-[0.2em] uppercase text-white/70">{stat.label}</div>
+      </div>
+    ))}
+  </div>
+);
+
+const Trophies = () => (
+  <section id="trophies" className="bg-dark px-6 md:px-12 py-32">
+    <div className="grid md:grid-cols-2 gap-16 items-end mb-20">
+      <div>
+        <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
+          <div className="w-8 h-px bg-gold" />
+          Honours
+        </div>
+        <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight">Trophy<br/>Cabinet</h2>
+      </div>
+      <p className="text-[0.8rem] text-gray leading-[2]">From Argentina to Spain to Paris to Miami — every chapter of Messi's career has been defined by silverware. A collection no player in history can match.</p>
+    </div>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-albi/10">
+      {[
+        { count: '8×', name: "Ballon d'Or", desc: "2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023", icon: "⭐" },
+        { count: '1×', name: "FIFA World Cup", desc: "Qatar 2022 — Player of the Tournament", icon: "🏆" },
+        { count: '3×', name: "Copa América", desc: "2021 (Brazil), 2024 (USA), 2019 (runner-up)", icon: "🥇" },
+        { count: '4×', name: "Champions League", desc: "2006, 2009, 2011, 2015 with FC Barcelona", icon: "🏅" },
+        { count: '10×', name: "La Liga", desc: "All 10 titles won with FC Barcelona", icon: "🇪🇸" },
+        { count: '7×', name: "Copa del Rey", desc: "Spain's domestic cup — FC Barcelona era", icon: "🏟" },
+        { count: '3×', name: "Club World Cup", desc: "FIFA Club World Cup champion", icon: "🌍" },
+        { count: '6×', name: "European Golden Shoe", desc: "Top scorer in European leagues — record 6 times", icon: "⚽" }
+      ].map((trophy, i) => (
+        <div key={i} className="bg-dark p-8 relative group hover:bg-mid transition-colors">
+          <div className="absolute top-6 right-6 text-2xl opacity-15">{trophy.icon}</div>
+          <div className="font-anton text-6xl text-gold leading-none mb-2">{trophy.count}</div>
+          <div className="text-[0.7rem] tracking-widest uppercase text-white mb-1">{trophy.name}</div>
+          <div className="text-[0.6rem] text-gray leading-relaxed">{trophy.desc}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+const Timeline = () => (
+  <section id="career" className="bg-black px-6 md:px-12 py-32">
+    <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
+      <div className="w-8 h-px bg-gold" />
+      The Journey
+    </div>
+    <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">Career<br/>Timeline</h2>
+    <div className="relative pl-0 sm:pl-32">
+      <div className="absolute left-4 sm:left-[8.5rem] top-0 bottom-0 w-px bg-gradient-to-b from-gold to-gold/10" />
+      {[
+        { year: '2000', event: 'Signs with FC Barcelona aged 13 — legendary napkin contract', club: 'FC Barcelona Youth Academy' },
+        { year: '2004', event: 'Liga debut at 17 — becomes youngest Barça player at the time', club: 'FC Barcelona' },
+        { year: '2009', event: 'First Ballon d\'Or · Champions League · Treble season under Pep Guardiola', club: 'FC Barcelona' },
+        { year: '2012', event: 'Records 91 goals in a single calendar year — a world record', club: 'FC Barcelona' },
+        { year: '2021', event: 'Signs for Paris Saint-Germain · Wins Copa América with Argentina', club: 'PSG · Argentina' },
+        { year: '2022', event: 'Wins the FIFA World Cup in Qatar · Named Player of the Tournament', club: 'Argentina National Team' },
+        { year: '2023', event: 'Joins Inter Miami CF · Wins 8th Ballon d\'Or · Leagues Cup champion', club: 'Inter Miami CF · MLS' }
+      ].map((item, i) => (
+        <div key={i} className="grid grid-cols-[4rem_1fr] sm:grid-cols-[8rem_1fr] gap-6 sm:gap-12 pb-12 relative">
+          <div className="absolute left-4 sm:left-[8.5rem] -translate-x-1/2 top-1 w-2.5 h-2.5 rounded-full bg-gold border-2 border-black" />
+          <div className="font-anton text-lg sm:text-xl text-gold tracking-widest text-left sm:text-right pr-0 sm:pr-8">{item.year}</div>
+          <div>
+            <div className="text-[0.7rem] sm:text-[0.8rem] tracking-wider text-white leading-relaxed mb-1">{item.event}</div>
+            <div className="text-[0.55rem] sm:text-[0.6rem] tracking-[0.15em] uppercase text-albi">{item.club}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+const Partners = () => (
+  <section className="bg-dark px-6 md:px-12 py-32">
+    <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
+      <div className="w-8 h-px bg-gold" />
+      Partners & Campaigns
+    </div>
+    <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">Brands &<br/>Sponsors</h2>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 border border-albi/10">
+      {['Adidas', 'Pepsi', 'Hard Rock', 'Apple TV+', 'Budweiser', 'MLS', 'Lay\'s', 'Gatorade', 'Michelob', 'Jacob & Co', 'Crypto.com', 'Socios'].map((brand, i) => (
+        <div key={i} className="p-10 border-r border-b border-albi/10 flex items-center justify-center hover:bg-albi/5 transition-colors group">
+          <span className="font-anton text-xl tracking-widest text-gray group-hover:text-gold transition-colors uppercase">{brand}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+const Social = () => (
+  <section id="social" className="bg-black px-6 md:px-12 py-32 text-center">
+    <div className="flex items-center justify-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
+      <div className="w-8 h-px bg-gold" />
+      Follow Leo
+    </div>
+    <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">On Social</h2>
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="aspect-square bg-mid border border-albi/10 flex items-center justify-center text-[0.6rem] tracking-[0.2em] uppercase text-albi/20 group cursor-pointer overflow-hidden">
+          <div className="group-hover:scale-110 transition-transform duration-500">[ Instagram Photo Slot ]</div>
+        </div>
+      ))}
+    </div>
+    <div className="flex flex-wrap justify-center gap-8">
+      {[
+        { name: 'Instagram', icon: <Instagram className="w-4 h-4" /> },
+        { name: 'YouTube', icon: <Youtube className="w-4 h-4" /> },
+        { name: 'X / Twitter', icon: <Twitter className="w-4 h-4" /> },
+        { name: 'Facebook', icon: <Facebook className="w-4 h-4" /> }
+      ].map(social => (
+        <a key={social.name} href="#" className="flex items-center gap-2 text-[0.6rem] tracking-[0.2em] uppercase text-white/60 hover:text-gold transition-colors border-b border-transparent hover:border-gold pb-1">
+          {social.icon} {social.name}
+        </a>
+      ))}
+    </div>
+  </section>
+);
+
+const Footer = ({ bgImage }: { bgImage: string }) => (
+  <footer className="relative bg-dark px-6 md:px-12 pt-20 pb-12 border-t border-albi/15 overflow-hidden group">
+    {/* Background Image with Glossy Effect */}
+    <div className="absolute inset-0 z-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
+      <img 
+        src={bgImage} 
+        alt="Footer Background" 
+        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
+        referrerPolicy="no-referrer"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
+      
+      {/* Glossy Overlay */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+        <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent,rgba(201,168,76,0.1),transparent)] animate-[spin_10s_linear_infinite]" />
+      </div>
+    </div>
+
+    <div className="relative z-10 grid md:grid-cols-3 gap-16 mb-16">
+      <div>
+        <div className="font-anton text-5xl text-gold leading-none mb-6">LM<br/>10</div>
+        <p className="font-playfair italic text-gray leading-relaxed">"Always bringing the fight."</p>
+      </div>
+      <div>
+        <div className="text-[0.6rem] tracking-[0.25em] uppercase text-gold mb-6">Pages</div>
+        <ul className="space-y-3">
+          {['Story', 'On Pitch', 'Trophies', 'Career', 'Social'].map(item => (
+            <li key={item}><a href="#" className="text-[0.75rem] text-gray hover:text-white transition-colors">{item}</a></li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <div className="text-[0.6rem] tracking-[0.25em] uppercase text-gold mb-6">Follow</div>
+        <ul className="space-y-3">
+          {['Instagram', 'YouTube', 'X / Twitter', 'TikTok', 'Facebook'].map(item => (
+            <li key={item}><a href="#" className="text-[0.75rem] text-gray hover:text-white transition-colors">{item}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+    <div className="relative z-10 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+      <span className="text-[0.6rem] tracking-widest text-gray">© 2026 Lionel Messi. All rights reserved.</span>
+      <div className="flex gap-8">
+        <a href="#" className="text-[0.6rem] tracking-widest text-gray hover:text-white transition-colors">Privacy Policy</a>
+        <a href="#" className="text-[0.6rem] tracking-widest text-gray hover:text-white transition-colors">Terms</a>
+      </div>
+    </div>
+  </footer>
+);
+
+// --- Main App ---
+
+export default function App() {
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [heroData, setHeroData] = useState({
+    name1: 'Lionel',
+    name2: 'Messi',
+    tag: 'Inter Miami CF · Argentine National Team'
+  });
+
+  const [quoteData, setQuoteData] = useState({
+    text: 'I had to grow up fast, leave my home, leave my family — and I did it all with one purpose. To play football. To be the best.',
+    attr: '— Lionel Messi'
+  });
+
+  const [footerData, setFooterData] = useState({
+    bgImage: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1974&auto=format&fit=crop'
+  });
+
+  const handleLogoClick = () => {
+    setClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setIsAdminOpen(true);
+        return 0;
+      }
+      return next;
+    });
+  };
+
+  // Reset click count after 2 seconds of inactivity
+  useEffect(() => {
+    if (clickCount > 0) {
+      const timer = setTimeout(() => setClickCount(0), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [clickCount]);
+
+  return (
+    <div className="cursor-none selection:bg-gold selection:text-black">
+      <CustomCursor />
+      <Navbar onLogoClick={handleLogoClick} />
+      
+      <main>
+        <Hero {...heroData} />
+        <div className="h-[3px] bg-gradient-to-r from-albi via-white to-albi" />
+        <Marquee />
+        <Story />
+        <PhotoStrip />
+        <StatsRow />
+        
+        <div className="bg-black text-center py-32 px-6 md:px-12">
+          <motion.blockquote 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="font-playfair text-3xl md:text-6xl italic text-white max-w-4xl mx-auto mb-8"
+          >
+            "{quoteData.text.split(' ').map((word, i) => (
+              <span key={i} className={['grow', 'best', 'purpose'].includes(word.toLowerCase().replace(/[^a-z]/g, '')) ? 'text-gold not-italic' : ''}>
+                {word}{' '}
+              </span>
+            ))}"
+          </motion.blockquote>
+          <cite className="text-[0.6rem] tracking-[0.25em] uppercase text-gray">{quoteData.attr}</cite>
+        </div>
+
+        <Trophies />
+        <Timeline />
+        <Partners />
+        <Social />
+      </main>
+
+      <Footer bgImage={footerData.bgImage} />
+      
+      <AnimatePresence>
+        {isAdminOpen && (
+          <AdminPanel 
+            isOpen={isAdminOpen}
+            onClose={() => setIsAdminOpen(false)}
+            heroData={heroData} 
+            setHeroData={setHeroData} 
+            quoteData={quoteData} 
+            setQuoteData={setQuoteData} 
+            footerData={footerData}
+            setFooterData={setFooterData}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

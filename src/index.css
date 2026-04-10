@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-anton: "Anton", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-mono: "Space Mono", monospace;
+  --font-bebas: "Bebas Neue", sans-serif;
+
+  --color-albi: #74ACDF;
+  --color-albi-dark: #3B87C4;
+  --color-albi-deep: #1B5E9E;
+  --color-gold: #C9A84C;
+  --color-gold-light: #F0D080;
+  --color-white: #F5F5F0;
+  --color-black: #0A0A0A;
+  --color-dark: #111111;
+  --color-mid: #1E1E1E;
+  --color-gray: #888880;
+  --color-accent: #C9A84C;
+}
+
+@layer base {
+  body {
+    @apply bg-black text-white font-mono overflow-x-hidden;
+  }
+}
+
+@layer components {
+  /* Admin Panel Specific Styles */
+  .admin-sidebar {
+    @apply w-64 min-h-screen bg-dark border-r border-gold/15 flex flex-col fixed left-0 top-0 bottom-0 z-50 overflow-y-auto;
+  }
+  
+  .admin-nav-item {
+    @apply flex items-center gap-3 px-6 py-3 text-[0.7rem] tracking-wider text-gray cursor-pointer transition-all border-l-3 border-transparent hover:text-white hover:bg-white/5;
+  }
+  
+  .admin-nav-item.active {
+    @apply text-gold bg-gold/5 border-l-gold;
+  }
+
+  .admin-main {
+    @apply ml-64 flex-1 flex flex-col min-h-screen bg-black;
+  }
+
+  .admin-card {
+    @apply bg-mid border border-gold/15 rounded p-6 mb-5;
+  }
+
+  .admin-field {
+    @apply mb-4;
+  }
+
+  .admin-label {
+    @apply block text-[0.6rem] tracking-widest uppercase text-gray mb-1.5;
+  }
+
+  .admin-input {
+    @apply w-full bg-dark border border-white/10 text-white px-3 py-2 font-mono text-[0.7rem] outline-none transition-colors rounded-sm focus:border-gold/50;
+  }
+
+  .admin-toggle {
+    @apply w-10 h-5 bg-dark border border-white/10 rounded-full relative cursor-pointer transition-colors;
+  }
+
+  .admin-toggle.on {
+    @apply bg-gold border-gold;
+  }
+
+  .admin-toggle::after {
+    @apply content-[''] absolute w-3.5 h-3.5 bg-white rounded-full top-0.5 left-0.5 transition-all;
+  }
+
+  .admin-toggle.on::after {
+    @apply left-5.5;
+  }
+
+  .admin-img-slot {
+    @apply bg-dark border border-dashed border-albi/20 rounded aspect-video flex flex-col items-center justify-center gap-2 text-gray text-[0.6rem] tracking-widest uppercase cursor-pointer transition-colors mb-3 relative overflow-hidden hover:border-gold/40;
+  }
+}
+
+@layer utilities {
+  .cursor-none {
+    cursor: none;
+  }
+  .border-l-3 {
+    border-left-width: 3px;
+  }
+}
