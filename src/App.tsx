@@ -52,8 +52,7 @@ const CustomCursor = () => {
       <div 
         className="fixed top-0 left-0 w-3 h-3 bg-gold rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100 hidden md:block"
         style={{ 
-          transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)`,
-          boxShadow: '0 0 15px #C9A84C, 0 0 30px #C9A84C'
+          transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)`
         }}
       />
       <div 
@@ -107,7 +106,6 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
           className="hidden sm:block text-[0.65rem] tracking-[0.15em] uppercase text-gold border border-gold/40 px-4 py-2 hover:bg-gold/10 transition-colors"
           whileHover={{ 
             scale: 1.05,
-            boxShadow: "0 0 20px rgba(201,168,76,0.3)",
             transition: { type: "spring", stiffness: 400, damping: 10 }
           }}
           whileTap={{ scale: 0.95 }}
@@ -258,7 +256,7 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
         </motion.div>
       </div>
 
-      {/* Background "10" (Now above profile) */}
+      {/* Background "10" (Top Layer) */}
       <motion.div 
         initial={{ opacity: 0, x: 100 }}
         animate={{ 
@@ -266,7 +264,7 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
           x: mousePos.x * 2,
           y: [0, -20, 0]
         }}
-        whileHover={{ opacity: 0.3, scale: 1.05, filter: "brightness(1.5)" }}
+        whileHover={{ opacity: 0.3, scale: 1.05 }}
         transition={{ 
           opacity: { duration: 1.5 },
           x: { type: "spring", stiffness: 50, damping: 30 },
@@ -289,32 +287,34 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
             alt="Messi Profile" 
             whileHover={{ 
               scale: 1.08, 
-              filter: "brightness(1.3) drop-shadow(0 0 50px rgba(201,168,76,0.8))",
               rotate: [0, -1, 1, -1, 0],
             }}
             transition={{ rotate: { duration: 0.5, repeat: Infinity } }}
-            className="h-[85%] md:h-[95%] object-contain drop-shadow-[0_0_60px_rgba(201,168,76,0.4)] transition-all duration-500"
+            className="h-[85%] md:h-[95%] object-contain transition-all duration-500"
             referrerPolicy="no-referrer"
           />
-          {/* Crazy Aura Effect */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.15)_0%,transparent_70%)] opacity-0 group-hover/profile:opacity-100 transition-opacity duration-700 pointer-events-none" />
+          {/* Aura Effect (Glow removed) */}
+          <div className="absolute inset-0 opacity-0 pointer-events-none" />
         </motion.div>
       )}
       
       {/* Content (Front Layer) */}
       <div className="relative z-20 px-6 md:px-12 w-full h-full flex flex-col py-12 md:py-20">
         <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-7xl mx-auto w-full">
-            {/* Foreground Name (Centered vertically in the middle area) */}
+          <motion.div 
+            animate={{ x: [-100, 100] }}
+            transition={{ duration: 20, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+            className="max-w-7xl mx-auto w-full"
+          >
             <div className="w-full font-anton text-6xl sm:text-8xl md:text-[10vw] lg:text-[15rem] leading-none uppercase cursor-default relative origin-center group-hover/hero:scale-x-[1.05] group-hover/hero:scale-y-[1.05] transition-all duration-700 ease-in-out">
-              <div className="flex justify-between w-full overflow-hidden group-hover/hero:text-gold transition-colors duration-500">
-                {(name1 + name2).split('').map((char, i) => (
+              <div className="flex justify-between w-full overflow-hidden transition-colors duration-500">
+                {(name1 + ' ' + name2).split('').map((char, i) => (
                   <motion.span
                     key={i}
                     initial={{ y: "100%", opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.8, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
-                    className="inline-block drop-shadow-[0_0_15px_rgba(201,168,76,0)] group-hover/hero:drop-shadow-[0_0_25px_rgba(201,168,76,0.4)]"
+                    className={`inline-block ${i < name1.length ? 'text-white' : char === ' ' ? 'px-[0.2em]' : 'text-[#74ACDF]'}`}
                   >
                     {char}
                   </motion.span>
@@ -329,7 +329,7 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
                 {"LEGENDARY".split('').map((c, i) => <span key={i}>{c}</span>)}
               </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div className="max-w-7xl mx-auto w-full">
