@@ -283,7 +283,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           <p className="text-gray text-xs mb-8 leading-relaxed">
             This area is reserved for the site administrator. Please sign in with the authorized account to continue.
             <br/><br/>
-            <span className="text-gold opacity-50 italic">If you see an error, please try a <strong>Hard Refresh</strong> (Ctrl+F5 or Cmd+Shift+R).</span>
+            <span className="text-gold opacity-50 italic">If you see "Domain Unauthorized", please add this exact domain to your Firebase Authorized Domains:</span>
+            <div className="mt-2 p-2 bg-black/40 border border-white/10 rounded flex items-center justify-between gap-2">
+              <code className="text-[0.6rem] text-gold break-all">{window.location.hostname}</code>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.hostname);
+                  alert("Domain copied to clipboard!");
+                }}
+                className="text-[0.5rem] bg-white/10 px-2 py-1 rounded hover:bg-white/20 transition-all uppercase font-bold"
+              >
+                Copy
+              </button>
+            </div>
+            <br/>
+            <span className="text-gold opacity-50 italic">Then try a <strong>Hard Refresh</strong> (Ctrl+F5 or Cmd+Shift+R).</span>
           </p>
           
           {user ? (
