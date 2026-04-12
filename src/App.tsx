@@ -73,7 +73,7 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-transparent pointer-events-none" />
       <button 
         onClick={onLogoClick}
-        className="relative z-10 font-bebas text-2xl tracking-[0.2em] text-gold cursor-none hover:opacity-80 transition-opacity"
+        className="relative z-10 font-bebas text-2xl tracking-[0.2em] text-gold cursor-none hover:opacity-80 transition-opacity drop-shadow-[0_0_8px_rgba(201,168,76,0.4)]"
       >
         LM · 10
       </button>
@@ -84,7 +84,7 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
           <li key={item}>
             <motion.a 
               href={`#${item.toLowerCase().replace(' ', '-')}`} 
-              className="relative text-[0.65rem] tracking-[0.2em] uppercase text-white/70 hover:text-gold transition-colors group inline-block"
+              className="relative text-[0.65rem] tracking-[0.2em] uppercase text-white/70 hover:text-gold transition-colors group inline-block drop-shadow-[0_0_5px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_8px_rgba(201,168,76,0.5)]"
               whileHover={{ 
                 y: -5,
                 scale: 1.1,
@@ -93,7 +93,7 @@ const Navbar = ({ onLogoClick }: { onLogoClick: () => void }) => {
             >
               {item}
               <motion.span 
-                className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"
+                className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full shadow-[0_0_8px_rgba(201,168,76,0.5)]"
               />
             </motion.a>
           </li>
@@ -270,11 +270,44 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
           x: { type: "spring", stiffness: 50, damping: 30 },
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
         }}
-        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[30vw] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-15" 
+        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[30vw] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-15 drop-shadow-[0_0_20px_rgba(116,172,223,0.1)]" 
         style={{ WebkitTextStroke: '1px rgba(116,172,223,0.3)' }}
       >
         10
       </motion.div>
+
+      {/* Background Name Slider (Bottom Layer) */}
+      <div className="absolute inset-0 z-5 flex items-start justify-center overflow-hidden pointer-events-none pt-16 md:pt-20">
+        <motion.div 
+          animate={{ x: [-100, 100] }}
+          transition={{ duration: 20, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+          className="max-w-7xl mx-auto w-full px-6 md:px-12"
+        >
+          <div className="w-full font-anton text-6xl sm:text-8xl md:text-[10vw] lg:text-[13rem] leading-none uppercase cursor-default relative origin-center group-hover/hero:scale-x-[1.05] group-hover/hero:scale-y-[1.05] transition-all duration-700 ease-in-out">
+            <div className="flex justify-between w-full overflow-hidden transition-colors duration-500">
+              {(name1 + ' ' + name2).split('').map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
+                  className={`inline-block drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] ${i < name1.length ? 'text-white' : char === ' ' ? 'px-[0.2em]' : 'text-[#74ACDF]'}`}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </div>
+            {/* Decorative LEGENDARY text */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.08 }}
+              className="absolute -bottom-8 left-0 w-full flex justify-between font-sans font-thin text-[0.6rem] tracking-[2em] text-white pointer-events-none scale-x-[1.5] origin-left"
+            >
+              {"LEGENDARY".split('').map((c, i) => <span key={i}>{c}</span>)}
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Profile Image (Middle Layer) */}
       {profileImage && (
@@ -282,17 +315,33 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
           style={{ opacity: profileOpacity, scale: profileScale }}
           className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto cursor-pointer group/profile"
         >
-          <motion.img 
-            src={profileImage} 
-            alt="Messi Profile" 
-            whileHover={{ 
-              scale: 1.08, 
-              rotate: [0, -1, 1, -1, 0],
-            }}
-            transition={{ rotate: { duration: 0.5, repeat: Infinity } }}
-            className="h-[85%] md:h-[95%] object-contain transition-all duration-500"
-            referrerPolicy="no-referrer"
-          />
+          <div className="relative h-[85%] md:h-[95%] overflow-hidden">
+            <motion.img 
+              src={profileImage} 
+              alt="Messi Profile" 
+              whileHover={{ 
+                scale: 1.05,
+                filter: "sepia(0) contrast(1.1) brightness(1.05) saturate(1.1) blur(0px)",
+              }}
+              initial={{ filter: "sepia(0.6) contrast(1.3) brightness(0.55) saturate(0.4) grayscale(0.3) blur(0.8px)" }}
+              transition={{ 
+                duration: 0.8,
+                scale: { duration: 0.4 },
+                filter: { duration: 0.5 }
+              }}
+              className="h-full object-contain transition-all duration-500"
+              style={{ 
+                maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
+              }}
+              referrerPolicy="no-referrer"
+            />
+            {/* Vintage Grain & Vignette Overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.12] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,transparent_30%,rgba(0,0,0,0.6)_100%)] opacity-80" />
+            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2)_0%,transparent_20%,transparent_80%,rgba(0,0,0,0.5)_100%)]" />
+            <div className="absolute inset-0 pointer-events-none bg-black/20 mix-blend-multiply" />
+          </div>
           {/* Aura Effect (Glow removed) */}
           <div className="absolute inset-0 opacity-0 pointer-events-none" />
         </motion.div>
@@ -300,50 +349,20 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
       
       {/* Content (Front Layer) */}
       <div className="relative z-20 px-6 md:px-12 w-full h-full flex flex-col py-12 md:py-20">
-        <div className="flex-1 flex items-center justify-center">
-          <motion.div 
-            animate={{ x: [-100, 100] }}
-            transition={{ duration: 20, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
-            className="max-w-7xl mx-auto w-full"
-          >
-            <div className="w-full font-anton text-6xl sm:text-8xl md:text-[10vw] lg:text-[15rem] leading-none uppercase cursor-default relative origin-center group-hover/hero:scale-x-[1.05] group-hover/hero:scale-y-[1.05] transition-all duration-700 ease-in-out">
-              <div className="flex justify-between w-full overflow-hidden transition-colors duration-500">
-                {(name1 + ' ' + name2).split('').map((char, i) => (
-                  <motion.span
-                    key={i}
-                    initial={{ y: "100%", opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
-                    className={`inline-block ${i < name1.length ? 'text-white' : char === ' ' ? 'px-[0.2em]' : 'text-[#74ACDF]'}`}
-                  >
-                    {char}
-                  </motion.span>
-                ))}
-              </div>
-              {/* Decorative LEGENDARY text */}
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.08 }}
-                className="absolute -bottom-8 left-0 w-full flex justify-between font-sans font-thin text-[0.6rem] tracking-[2em] text-white pointer-events-none scale-x-[1.5] origin-left"
-              >
-                {"LEGENDARY".split('').map((c, i) => <span key={i}>{c}</span>)}
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
+        <div className="flex-1" />
 
         <div className="max-w-7xl mx-auto w-full">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="flex items-center gap-4 mb-8 text-[0.5rem] md:text-[0.6rem] tracking-[0.3em] uppercase text-gold"
+            className="flex items-center gap-4 mb-8 text-[0.5rem] md:text-[0.6rem] tracking-[0.3em] uppercase text-gold drop-shadow-[0_0_12px_rgba(201,168,76,0.8)] brightness-110"
           >
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: 40 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="h-px bg-gold" 
+              className="h-px bg-gold shadow-[0_0_12px_rgba(201,168,76,0.8)]" 
             />
             {tag}
           </motion.div>
@@ -355,10 +374,10 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.2 + (groupIdx * 0.2) }}
-                  className="text-[0.45rem] tracking-[0.3em] uppercase text-gold/60 flex items-center gap-2"
+                  className="text-[0.45rem] tracking-[0.3em] uppercase text-gold flex items-center gap-2 drop-shadow-[0_0_8px_rgba(201,168,76,0.6)] brightness-110"
                 >
                   {group}
-                  <div className="h-px w-8 bg-gold/10" />
+                  <div className="h-px w-8 bg-gold/40 shadow-[0_0_8px_rgba(201,168,76,0.6)]" />
                 </motion.div>
                 <div className="flex flex-wrap gap-x-8 gap-y-3">
                   {groupStats.map((stat: any, i: number) => (
@@ -372,13 +391,13 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
                       }}
                       className="min-w-[60px]"
                     >
-                      <div className="font-anton text-xl md:text-2xl text-gold leading-none">
+                      <div className="font-anton text-xl md:text-2xl text-gold leading-none drop-shadow-[0_0_15px_rgba(201,168,76,0.9)] brightness-125">
                         <Counter 
                           value={stat.num} 
                           delay={1.5 + (groupIdx * 0.2) + (i * 0.1)} 
                         />
                       </div>
-                      <div className="text-[0.4rem] md:text-[0.45rem] tracking-[0.1em] uppercase text-gray mt-0.5">{stat.label}</div>
+                      <div className="text-[0.4rem] md:text-[0.45rem] tracking-[0.1em] uppercase text-white mt-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medium">{stat.label}</div>
                     </motion.div>
                   ))}
                 </div>
@@ -392,12 +411,12 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 2 }}
-        className="absolute bottom-8 right-12 hidden md:flex flex-col items-center gap-2 text-[0.55rem] tracking-[0.2em] uppercase text-gray"
+        className="absolute bottom-8 right-12 hidden md:flex flex-col items-center gap-2 text-[0.55rem] tracking-[0.2em] uppercase text-gold drop-shadow-[0_0_8px_rgba(201,168,76,0.4)]"
       >
         <motion.div 
           animate={{ height: [0, 60, 0], y: [0, 0, 60] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px bg-gold" 
+          className="w-px bg-gold shadow-[0_0_8px_rgba(201,168,76,0.4)]" 
         />
         Scroll
       </motion.div>
