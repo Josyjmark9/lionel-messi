@@ -1,5 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from 'firebase/auth';
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  onAuthStateChanged, 
+  User,
+  setPersistence,
+  browserLocalPersistence 
+} from 'firebase/auth';
 import { getFirestore, doc, onSnapshot, setDoc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -7,15 +15,27 @@ import firebaseConfig from '../firebase-applet-config.json';
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
+
+// Set persistence to local
+setPersistence(auth, browserLocalPersistence).catch(err => console.error("Persistence Error:", err));
+
 export const googleProvider = new GoogleAuthProvider();
+// Force account selection to help with "disappearing" issues
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 // Auth Helpers
 export const loginWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
-  } catch (error) {
-    console.error("Login Error:", error);
+  } catch (error: any) {
+    console.error("Detailed Login Error:", {
+      code: error.code,
+      message: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 };

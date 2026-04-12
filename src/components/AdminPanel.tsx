@@ -92,21 +92,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const isAuthorized = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   const handleLogin = async () => {
+    if (isLoggingIn) return;
     try {
+      setIsLoggingIn(true);
       setLoginError(null);
       await onLogin();
     } catch (error: any) {
+      console.error("Admin Login Catch:", error);
       if (error.code === 'auth/popup-blocked') {
         setLoginError("Popup was blocked by your browser. Please allow popups for this site.");
       } else if (error.code === 'auth/popup-closed-by-user') {
         setLoginError("The sign-in window was closed before completion.");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setLoginError(`Domain Unauthorized: This domain is not authorized in Firebase. Error Code: ${error.code}`);
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setLoginError("Google Sign-In is not enabled in the Firebase Console.");
       } else {
-        setLoginError("An error occurred during sign-in. Please try again.");
+        setLoginError(`Sign-in Error: ${error.message || 'Unknown error'} (Code: ${error.code || 'N/A'})`);
       }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -290,9 +300,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
               )}
               <button 
                 onClick={handleLogin}
-                className="w-full bg-gold text-black py-3 rounded font-bold text-[0.7rem] tracking-widest uppercase hover:bg-gold-light transition-all flex items-center justify-center gap-2"
+                disabled={isLoggingIn}
+                className={`w-full bg-gold text-black py-3 rounded font-bold text-[0.7rem] tracking-widest uppercase hover:bg-gold-light transition-all flex items-center justify-center gap-2 ${isLoggingIn ? 'opacity-50 cursor-wait' : ''}`}
               >
-                <LogIn size={14} /> Sign In with Google
+                {isLoggingIn ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={14} /> Sign In with Google
+                  </>
+                )}
               </button>
             </div>
           )}
