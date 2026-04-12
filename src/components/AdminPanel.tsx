@@ -55,6 +55,8 @@ interface AdminPanelProps {
   setSeoData: (data: any) => void;
   achievementsData: any[];
   setAchievementsData: (data: any[]) => void;
+  partnersData: any[];
+  setPartnersData: (data: any[]) => void;
 }
 
 const ADMIN_EMAIL = "josiahjohnmark9@gmail.com";
@@ -84,7 +86,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   seoData,
   setSeoData,
   achievementsData,
-  setAchievementsData
+  setAchievementsData,
+  partnersData,
+  setPartnersData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -192,6 +196,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         const newData = [...trophiesData];
         newData[index] = { ...newData[index], imageUrl: compressed };
         setTrophiesData(newData);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePartnerUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 400, 400, isPng);
+        const newData = [...partnersData];
+        newData[index] = { ...newData[index], logo: compressed };
+        setPartnersData(newData);
       };
       reader.readAsDataURL(file);
     }
@@ -1081,8 +1100,81 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
               </motion.div>
             )}
 
+            {activeTab === 'partners' && (
+              <motion.div 
+                key="partners"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="admin-label text-gold">Partners & Brands</h3>
+                  <button 
+                    onClick={() => setPartnersData([...partnersData, { name: 'New Brand', logo: '' }])}
+                    className="bg-gold/10 text-gold border border-gold/20 px-4 py-2 text-[0.6rem] tracking-widest uppercase hover:bg-gold/20 transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={12} /> Add Brand
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {partnersData.map((partner, i) => (
+                    <div key={i} className="admin-card relative group">
+                      <button 
+                        onClick={() => setPartnersData(partnersData.filter((_, index) => index !== i))}
+                        className="absolute top-4 right-4 text-red/40 hover:text-red transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <div className="space-y-4">
+                        <div className="admin-img-slot h-24 relative overflow-hidden group bg-transparency-grid">
+                          {partner.logo ? (
+                            <SafeImage src={partner.logo} alt={partner.name} className="max-h-full max-w-full object-contain opacity-80" />
+                          ) : (
+                            <Users size={20} className="opacity-40" />
+                          )}
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => handlePartnerUpload(e, i)}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Brand Name</label>
+                          <input 
+                            type="text" 
+                            value={partner.name}
+                            onChange={(e) => {
+                              const newData = [...partnersData];
+                              newData[i] = { ...newData[i], name: e.target.value };
+                              setPartnersData(newData);
+                            }}
+                            className="admin-input" 
+                          />
+                        </div>
+                        <div className="admin-field">
+                          <label className="admin-label">Logo URL</label>
+                          <input 
+                            type="url" 
+                            value={partner.logo || ''}
+                            onChange={(e) => {
+                              const newData = [...partnersData];
+                              newData[i] = { ...newData[i], logo: e.target.value };
+                              setPartnersData(newData);
+                            }}
+                            placeholder="https://..."
+                            className="admin-input" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* Placeholder for other tabs */}
-            {!['dashboard', 'hero', 'story', 'nav-footer', 'photos', 'social', 'trophies', 'achievements', 'timeline', 'stats', 'seo'].includes(activeTab) && (
+            {!['dashboard', 'hero', 'story', 'nav-footer', 'photos', 'social', 'trophies', 'achievements', 'timeline', 'stats', 'seo', 'partners'].includes(activeTab) && (
               <div className="flex flex-col items-center justify-center h-64 text-gray">
                 <Settings size={48} className="opacity-10 mb-4 animate-spin-slow" />
                 <p className="text-[0.7rem] tracking-widest uppercase">This section is ready for content integration</p>

@@ -28,7 +28,8 @@ import {
   Facebook,
   Menu,
   X,
-  Upload
+  Upload,
+  Users
 } from 'lucide-react';
 import AdminPanel from './components/AdminPanel';
 
@@ -652,7 +653,7 @@ const Timeline = ({ timeline }: { timeline: any[] }) => (
   </section>
 );
 
-const Partners = () => (
+const Partners = ({ partners }: { partners: any[] }) => (
   <section className="bg-dark px-6 md:px-12 py-32">
     <div className="flex items-center gap-4 mb-4 text-[0.6rem] tracking-[0.3em] uppercase text-gold">
       <div className="w-8 h-px bg-gold" />
@@ -660,9 +661,22 @@ const Partners = () => (
     </div>
     <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">Brands &<br/>Sponsors</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 border border-albi/10">
-      {['Adidas', 'Pepsi', 'Hard Rock', 'Apple TV+', 'Budweiser', 'MLS', 'Lay\'s', 'Gatorade', 'Michelob', 'Jacob & Co', 'Crypto.com', 'Socios'].map((brand, i) => (
-        <div key={i} className="p-10 border-r border-b border-albi/10 flex items-center justify-center hover:bg-albi/5 transition-colors group">
-          <span className="font-anton text-xl tracking-widest text-gray group-hover:text-gold transition-colors uppercase">{brand}</span>
+      {partners.map((partner, i) => (
+        <div key={i} className="p-10 border-r border-b border-albi/10 flex flex-col items-center justify-center hover:bg-albi/5 transition-colors group gap-4 min-h-[180px]">
+          {partner.logo ? (
+            <SafeImage 
+              src={partner.logo} 
+              alt={partner.name} 
+              className="max-w-[80%] max-h-[60px] object-contain opacity-60 group-hover:opacity-100 transition-opacity"
+              width={120}
+              height={60}
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gold/20">
+              <Users size={20} />
+            </div>
+          )}
+          <span className="font-anton text-[0.7rem] tracking-widest text-gray group-hover:text-gold transition-colors uppercase text-center">{partner.name}</span>
         </div>
       ))}
     </div>
@@ -844,6 +858,21 @@ export default function App() {
     { year: '2012', title: "Guinness World Record", desc: "91 goals in a single calendar year." }
   ]);
 
+  const [partnersData, setPartnersData] = useState([
+    { name: 'Adidas', logo: '' },
+    { name: 'Pepsi', logo: '' },
+    { name: 'Hard Rock', logo: '' },
+    { name: 'Apple TV+', logo: '' },
+    { name: 'Budweiser', logo: '' },
+    { name: 'MLS', logo: '' },
+    { name: 'Lay\'s', logo: '' },
+    { name: 'Gatorade', logo: '' },
+    { name: 'Michelob', logo: '' },
+    { name: 'Jacob & Co', logo: '' },
+    { name: 'Crypto.com', logo: '' },
+    { name: 'Socios', logo: '' }
+  ]);
+
   const [socialPhotosData, setSocialPhotosData] = useState(['', '', '', '', '', '']);
 
   // Auth Listener
@@ -873,6 +902,7 @@ export default function App() {
         if (data.seo) setSeoData(data.seo);
         if (data.achievements) setAchievementsData(data.achievements);
         if (data.socialPhotos) setSocialPhotosData(data.socialPhotos);
+        if (data.partners) setPartnersData(data.partners);
       }
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, 'config/main');
@@ -1014,7 +1044,7 @@ export default function App() {
           viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
-          <Partners />
+          <Partners partners={partnersData} />
         </motion.div>
 
         <motion.div
@@ -1057,6 +1087,8 @@ export default function App() {
             setSeoData={(data) => { setSeoData(data); saveToFirebase({ seo: data }); }}
             achievementsData={achievementsData}
             setAchievementsData={(data) => { setAchievementsData(data); saveToFirebase({ achievements: data }); }}
+            partnersData={partnersData}
+            setPartnersData={(data) => { setPartnersData(data); saveToFirebase({ partners: data }); }}
           />
         )}
       </AnimatePresence>
