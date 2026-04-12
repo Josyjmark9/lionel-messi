@@ -348,7 +348,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         <div className="p-6 border-bottom border-gold/15">
           <div className="font-bebas text-2xl text-gold tracking-widest leading-none mb-1">LM · 10</div>
           <div className="text-[0.6rem] tracking-[0.2em] uppercase text-gray">Website Admin Panel</div>
-          <div className="text-[0.4rem] text-gray/40 mt-1 uppercase tracking-widest">Build: 2026.04.12.v3</div>
+          <div className="text-[0.4rem] text-gray/40 mt-1 uppercase tracking-widest">Build: 2026.04.12.v4</div>
         </div>
 
         <div className="flex-1 py-4">
