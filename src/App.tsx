@@ -2,6 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SafeImage from './components/SafeImage';
+import { auth, db, loginWithGoogle, logout, handleFirestoreError, OperationType } from './firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged, User } from 'firebase/auth';
+
+/**
+ * IMAGE STRATEGY:
+ * 1. All images use the <SafeImage /> component for automatic fallback and lazy loading.
+ * 2. External URLs are used by default. For local images, place them in /public/images/
+ *    and use relative paths (e.g., "/images/my-photo.jpg").
+ * 3. Filenames should be strictly lowercase to avoid case-sensitivity issues on servers.
+ * 4. Alt text is mandatory for accessibility and SEO.
+ */
 
 gsap.registerPlugin(ScrollTrigger);
 import { 
@@ -229,11 +242,12 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
         className="absolute inset-0 z-0 grayscale hover:grayscale-0 transition-all duration-1000"
       >
         {bgImage ? (
-          <img 
+          <SafeImage 
             src={bgImage} 
-            alt="Messi Hero" 
+            alt="Messi Hero Background" 
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            width={1920}
+            height={1080}
           />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(116,172,223,0.12)_0%,transparent_60%),radial-gradient(ellipse_at_80%_80%,rgba(201,168,76,0.08)_0%,transparent_50%),linear-gradient(135deg,#0A0A0A_0%,#111520_50%,#0A0A0A_100%)]" />
@@ -320,9 +334,7 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
           className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto cursor-pointer group/profile"
         >
           <div className="relative h-[85%] md:h-[95%] overflow-hidden">
-            <motion.img 
-              src={profileImage} 
-              alt="Messi Profile" 
+            <motion.div
               whileHover={{ 
                 scale: 1.05,
                 filter: "sepia(0) contrast(1.1) brightness(1.05) saturate(1.1) blur(0px)",
@@ -333,13 +345,20 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
                 scale: { duration: 0.4 },
                 filter: { duration: 0.5 }
               }}
-              className="h-full object-contain transition-all duration-500"
+              className="h-full transition-all duration-500"
               style={{ 
                 maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
               }}
-              referrerPolicy="no-referrer"
-            />
+            >
+              <SafeImage 
+                src={profileImage} 
+                alt="Lionel Messi Profile" 
+                className="h-full object-contain"
+                width={800}
+                height={1200}
+              />
+            </motion.div>
             {/* Vintage Grain & Vignette Overlay */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.12] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
             <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,transparent_30%,rgba(0,0,0,0.6)_100%)] opacity-80" />
@@ -515,11 +534,12 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
         {photos.map((photo, i) => (
           <div key={i} className="relative w-[300px] md:w-[450px] h-[400px] md:h-[600px] bg-mid border border-albi/10 overflow-hidden group shrink-0">
             {photo.image ? (
-              <img 
+              <SafeImage 
                 src={photo.image} 
                 alt={photo.title} 
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
-                referrerPolicy="no-referrer"
+                width={450}
+                height={600}
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[0.6rem] tracking-widest uppercase text-albi/30">
@@ -565,11 +585,12 @@ const Trophies = ({ trophies }: { trophies: any[] }) => (
       {trophies.map((trophy, i) => (
         <div key={i} className="bg-dark relative group h-[350px] overflow-hidden border border-white/5">
           {trophy.imageUrl ? (
-            <img 
+            <SafeImage 
               src={trophy.imageUrl} 
-              alt={trophy.name} 
+              alt={`${trophy.name} Trophy`} 
               className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-40 group-hover:opacity-60"
-              referrerPolicy="no-referrer"
+              width={400}
+              height={350}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-mid/30">
@@ -665,11 +686,12 @@ const Social = ({ photos }: { photos: string[] }) => (
       {photos.map((img, i) => (
         <div key={i} className="aspect-square bg-mid border border-albi/10 flex items-center justify-center text-[0.6rem] tracking-[0.2em] uppercase text-albi/20 group cursor-pointer overflow-hidden">
           {img ? (
-            <img 
+            <SafeImage 
               src={img} 
-              alt={`Social ${i}`} 
+              alt={`Social Media Post ${i + 1}`} 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              referrerPolicy="no-referrer"
+              width={400}
+              height={400}
             />
           ) : (
             <div className="group-hover:scale-110 transition-transform duration-500">[ Instagram Photo Slot ]</div>
@@ -696,11 +718,12 @@ const Footer = ({ bgImage }: { bgImage: string }) => (
   <footer className="relative bg-dark px-6 md:px-12 pt-20 pb-12 border-t border-albi/15 overflow-hidden group">
     {/* Background Image with Glossy Effect */}
     <div className="absolute inset-0 z-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
-      <img 
+      <SafeImage 
         src={bgImage} 
-        alt="Footer Background" 
+        alt="Footer Background Image" 
         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
-        referrerPolicy="no-referrer"
+        width={1920}
+        height={600}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
       
@@ -747,6 +770,9 @@ const Footer = ({ bgImage }: { bgImage: string }) => (
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
   const [heroData, setHeroData] = useState({
     name1: 'Lionel',
     name2: 'Messi',
@@ -818,6 +844,51 @@ export default function App() {
   ]);
 
   const [socialPhotosData, setSocialPhotosData] = useState(['', '', '', '', '', '']);
+
+  // Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthReady(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Real-time Data Sync
+  useEffect(() => {
+    if (!isAuthReady) return;
+
+    const configDoc = doc(db, 'config', 'main');
+    const unsubscribe = onSnapshot(configDoc, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.hero) setHeroData(data.hero);
+        if (data.quote) setQuoteData(data.quote);
+        if (data.footer) setFooterData(data.footer);
+        if (data.photoStrip) setPhotoStripData(data.photoStrip);
+        if (data.trophies) setTrophiesData(data.trophies);
+        if (data.timeline) setTimelineData(data.timeline);
+        if (data.stats) setStatsData(data.stats);
+        if (data.seo) setSeoData(data.seo);
+        if (data.achievements) setAchievementsData(data.achievements);
+        if (data.socialPhotos) setSocialPhotosData(data.socialPhotos);
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'config/main');
+    });
+
+    return () => unsubscribe();
+  }, [isAuthReady]);
+
+  // Save Data Helper
+  const saveToFirebase = async (updates: any) => {
+    try {
+      const configDoc = doc(db, 'config', 'main');
+      await setDoc(configDoc, updates, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'config/main');
+    }
+  };
 
   // Update SEO Meta Tags
   useEffect(() => {
@@ -962,26 +1033,29 @@ export default function App() {
           <AdminPanel 
             isOpen={isAdminOpen}
             onClose={() => setIsAdminOpen(false)}
+            user={user}
+            onLogin={loginWithGoogle}
+            onLogout={logout}
             heroData={heroData} 
-            setHeroData={setHeroData} 
+            setHeroData={(data) => { setHeroData(data); saveToFirebase({ hero: data }); }} 
             quoteData={quoteData} 
-            setQuoteData={setQuoteData} 
+            setQuoteData={(data) => { setQuoteData(data); saveToFirebase({ quote: data }); }} 
             footerData={footerData}
-            setFooterData={setFooterData}
+            setFooterData={(data) => { setFooterData(data); saveToFirebase({ footer: data }); }}
             photoStripData={photoStripData}
-            setPhotoStripData={setPhotoStripData}
+            setPhotoStripData={(data) => { setPhotoStripData(data); saveToFirebase({ photoStrip: data }); }}
             socialPhotosData={socialPhotosData}
-            setSocialPhotosData={setSocialPhotosData}
+            setSocialPhotosData={(data) => { setSocialPhotosData(data); saveToFirebase({ socialPhotos: data }); }}
             trophiesData={trophiesData}
-            setTrophiesData={setTrophiesData}
+            setTrophiesData={(data) => { setTrophiesData(data); saveToFirebase({ trophies: data }); }}
             timelineData={timelineData}
-            setTimelineData={setTimelineData}
+            setTimelineData={(data) => { setTimelineData(data); saveToFirebase({ timeline: data }); }}
             statsData={statsData}
-            setStatsData={setStatsData}
+            setStatsData={(data) => { setStatsData(data); saveToFirebase({ stats: data }); }}
             seoData={seoData}
-            setSeoData={setSeoData}
+            setSeoData={(data) => { setSeoData(data); saveToFirebase({ seo: data }); }}
             achievementsData={achievementsData}
-            setAchievementsData={setAchievementsData}
+            setAchievementsData={(data) => { setAchievementsData(data); saveToFirebase({ achievements: data }); }}
           />
         )}
       </AnimatePresence>

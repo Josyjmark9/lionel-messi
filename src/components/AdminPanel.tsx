@@ -23,6 +23,7 @@ import {
   Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import SafeImage from './SafeImage';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -346,7 +347,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <p className="text-[0.55rem] text-gray mb-4 italic">This is the large background image that appears on the first page with a smooth fade-in animation.</p>
                     <div className="admin-img-slot relative overflow-hidden group">
                       {heroData.bgImage ? (
-                        <img src={heroData.bgImage} alt="Hero BG" className="w-full h-full object-cover opacity-50" />
+                        <SafeImage src={heroData.bgImage} alt="Hero BG Preview" className="w-full h-full object-cover opacity-50" />
                       ) : (
                         <>
                           <Plus size={20} className="opacity-40" />
@@ -377,7 +378,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <p className="text-[0.55rem] text-gray mb-4 italic">This image appears in the center of the hero section, behind the stats but in front of the scrolling name.</p>
                     <div className="admin-img-slot relative overflow-hidden group">
                       {heroData.profileImage ? (
-                        <img src={heroData.profileImage} alt="Profile" className="w-full h-full object-contain opacity-50" />
+                        <SafeImage src={heroData.profileImage} alt="Profile Preview" className="w-full h-full object-contain opacity-50" />
                       ) : (
                         <>
                           <Plus size={20} className="opacity-40" />
@@ -472,11 +473,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <p className="text-[0.55rem] text-gray mt-2 italic">Paste a link to a vintage Lionel Messi image here. The footer will apply a glossy, grayscale-to-color transition on hover.</p>
                   </div>
                   <div className="mt-4 aspect-video bg-mid border border-white/5 rounded overflow-hidden">
-                    <img 
+                    <SafeImage 
                       src={footerData.bgImage} 
-                      alt="Preview" 
+                      alt="Footer Preview" 
                       className="w-full h-full object-cover opacity-50"
-                      referrerPolicy="no-referrer"
                     />
                   </div>
                 </div>
@@ -499,7 +499,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="grid grid-cols-[100px_1fr] gap-4">
                       <div className="admin-img-slot h-24 relative overflow-hidden group">
                         {photo.image ? (
-                          <img src={photo.image} alt={photo.title} className="w-full h-full object-cover opacity-50" />
+                          <SafeImage src={photo.image} alt={photo.title} className="w-full h-full object-cover opacity-50" />
                         ) : (
                           <Plus size={16} className="opacity-40" />
                         )}
@@ -544,7 +544,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <h3 className="admin-label text-gold mb-3">Post Slot {i + 1}</h3>
                     <div className="admin-img-slot aspect-square relative overflow-hidden group mb-3">
                       {img ? (
-                        <img src={img} alt={`Social ${i}`} className="w-full h-full object-cover opacity-50" />
+                        <SafeImage src={img} alt={`Social Preview ${i + 1}`} className="w-full h-full object-cover opacity-50" />
                       ) : (
                         <Plus size={16} className="opacity-40" />
                       )}
@@ -600,7 +600,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           <div className="space-y-4">
                             <div className="admin-img-slot h-24 relative overflow-hidden group">
                               {trophy.imageUrl ? (
-                                <img src={trophy.imageUrl} alt={trophy.name} className="w-full h-full object-contain opacity-50" />
+                                <SafeImage src={trophy.imageUrl} alt={trophy.name} className="w-full h-full object-contain opacity-50" />
                               ) : (
                                 <Trophy size={20} className="opacity-40" />
                               )}

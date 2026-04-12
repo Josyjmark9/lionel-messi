@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "siteConfig": {
+      "title": "Site Configuration",
+      "description": "Global configuration for the website content",
+      "type": "object",
+      "properties": {
+        "hero": {
+          "type": "object",
+          "properties": {
+            "name1": { "type": "string" },
+            "name2": { "type": "string" },
+            "tag": { "type": "string" },
+            "bgImage": { "type": "string" },
+            "profileImage": { "type": "string" }
+          }
+        },
+        "quote": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "attr": { "type": "string" }
+          }
+        },
+        "footer": {
+          "type": "object",
+          "properties": {
+            "bgImage": { "type": "string" }
+          }
+        },
+        "photoStrip": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": { "type": "string" },
+              "title": { "type": "string" },
+              "image": { "type": "string" }
+            }
+          }
+        },
+        "trophies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "string" },
+              "name": { "type": "string" },
+              "desc": { "type": "string" },
+              "imageUrl": { "type": "string" },
+              "icon": { "type": "string" }
+            }
+          }
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": { "type": "string" },
+              "event": { "type": "string" },
+              "club": { "type": "string" }
+            }
+          }
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "num": { "type": "string" },
+              "label": { "type": "string" },
+              "group": { "type": "string" }
+            }
+          }
+        },
+        "achievements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": { "type": "string" },
+              "title": { "type": "string" },
+              "desc": { "type": "string" }
+            }
+          }
+        },
+        "socialPhotos": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/config/main": {
+      "schema": "siteConfig",
+      "description": "The main configuration document for the site"
+    }
+  }
+}
