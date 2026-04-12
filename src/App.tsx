@@ -228,18 +228,18 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
         initial={{ scale: 1.1, opacity: 0 }}
         animate={{ 
           scale: 1, 
-          opacity: 0.25,
+          opacity: 0.6,
           x: -mousePos.x * 0.5,
           y: -mousePos.y * 0.5
         }}
-        whileHover={{ opacity: 0.4 }}
+        whileHover={{ opacity: 0.8 }}
         transition={{ 
           scale: { duration: 2.5, ease: [0.22, 1, 0.36, 1] },
           opacity: { duration: 1 },
           x: { type: "spring", stiffness: 50, damping: 30 },
           y: { type: "spring", stiffness: 50, damping: 30 }
         }}
-        className="absolute inset-0 z-0 grayscale hover:grayscale-0 transition-all duration-1000"
+        className="absolute inset-0 z-0 transition-all duration-1000"
       >
         {bgImage ? (
           <SafeImage 
@@ -288,7 +288,7 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
           x: { type: "spring", stiffness: 50, damping: 30 },
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
         }}
-        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[30vw] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-15 drop-shadow-[0_0_20px_rgba(116,172,223,0.1)]" 
+        className="absolute right-[-0.05em] top-1/2 -translate-y-1/2 font-anton text-[45vw] md:text-[45vw] lg:text-[60rem] leading-[0.85] text-transparent select-none pointer-events-none z-15 drop-shadow-[0_0_20px_rgba(116,172,223,0.1)]" 
         style={{ WebkitTextStroke: '1px rgba(116,172,223,0.3)' }}
       >
         10
@@ -331,39 +331,40 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
       {profileImage && (
         <motion.div 
           style={{ opacity: profileOpacity, scale: profileScale }}
-          className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto cursor-pointer group/profile"
+          className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto cursor-pointer group/profile pt-12 md:pt-0"
         >
-          <div className="relative h-[85%] md:h-[95%] overflow-hidden">
+          <div className="relative h-[60%] md:h-[95%] bg-transparent">
             <motion.div
               whileHover={{ 
                 scale: 1.05,
-                filter: "sepia(0) contrast(1.1) brightness(1.05) saturate(1.1) blur(0px)",
+                filter: "grayscale(0) contrast(1.2) brightness(0.9)",
               }}
-              initial={{ filter: "sepia(0.6) contrast(1.3) brightness(0.55) saturate(0.4) grayscale(0.3) blur(0.8px)" }}
+              initial={{ filter: "grayscale(1) contrast(1.1) brightness(0.6) blur(0px)" }}
+              animate={{ 
+                y: [0, -15, 0],
+                rotate: [0, 1, 0, -1, 0]
+              }}
               transition={{ 
                 duration: 0.8,
                 scale: { duration: 0.4 },
-                filter: { duration: 0.5 }
+                filter: { duration: 0.5 },
+                y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                rotate: { duration: 10, repeat: Infinity, ease: "easeInOut" }
               }}
-              className="h-full transition-all duration-500"
+              className="h-full transition-all duration-500 bg-transparent"
               style={{ 
-                maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
+                maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
               }}
             >
               <SafeImage 
                 src={profileImage} 
                 alt="Lionel Messi Profile" 
-                className="h-full object-contain"
+                className="h-full object-contain bg-transparent drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]"
                 width={800}
                 height={1200}
               />
             </motion.div>
-            {/* Vintage Grain & Vignette Overlay */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.12] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,transparent_30%,rgba(0,0,0,0.6)_100%)] opacity-80" />
-            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2)_0%,transparent_20%,transparent_80%,rgba(0,0,0,0.5)_100%)]" />
-            <div className="absolute inset-0 pointer-events-none bg-black/20 mix-blend-multiply" />
           </div>
           {/* Aura Effect (Glow removed) */}
           <div className="absolute inset-0 opacity-0 pointer-events-none" />
@@ -390,19 +391,19 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
             {tag}
           </motion.div>
           
-          <div className="flex flex-wrap gap-x-16 gap-y-8">
+          <div className="flex flex-wrap md:flex-nowrap gap-x-8 md:gap-x-16 gap-y-6 md:gap-y-8">
             {Object.entries(groupedStats).map(([group, groupStats]: [string, any], groupIdx) => (
-              <div key={group} className="space-y-3">
+              <div key={group} className="space-y-2 md:space-y-3 w-[calc(50%-1rem)] md:w-auto">
                 <motion.div 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.2 + (groupIdx * 0.2) }}
-                  className="text-[0.45rem] tracking-[0.3em] uppercase text-gold flex items-center gap-2 drop-shadow-[0_0_8px_rgba(201,168,76,0.6)] brightness-110"
+                  className="text-[0.4rem] md:text-[0.45rem] tracking-[0.3em] uppercase text-gold flex items-center gap-2 drop-shadow-[0_0_8px_rgba(201,168,76,0.6)] brightness-110"
                 >
                   {group}
-                  <div className="h-px w-8 bg-gold/40 shadow-[0_0_8px_rgba(201,168,76,0.6)]" />
+                  <div className="h-px w-4 md:w-8 bg-gold/40 shadow-[0_0_8px_rgba(201,168,76,0.6)]" />
                 </motion.div>
-                <div className="flex flex-wrap gap-x-8 gap-y-3">
+                <div className="flex flex-wrap gap-x-4 md:gap-x-8 gap-y-2 md:gap-y-3">
                   {groupStats.map((stat: any, i: number) => (
                     <motion.div 
                       key={stat.label}
@@ -412,15 +413,15 @@ const Hero = ({ name1, name2, tag, bgImage, profileImage, stats }: { name1: stri
                         duration: 0.5, 
                         delay: 1.4 + (groupIdx * 0.2) + (i * 0.1)
                       }}
-                      className="min-w-[60px]"
+                      className="min-w-[45px] md:min-w-[60px]"
                     >
-                      <div className="font-anton text-xl md:text-2xl text-gold leading-none drop-shadow-[0_0_15px_rgba(201,168,76,0.9)] brightness-125">
+                      <div className="font-anton text-lg md:text-2xl text-gold leading-none drop-shadow-[0_0_15px_rgba(201,168,76,0.9)] brightness-125 [text-shadow:0_2px_10px_rgba(0,0,0,1)]">
                         <Counter 
                           value={stat.num} 
                           delay={1.5 + (groupIdx * 0.2) + (i * 0.1)} 
                         />
                       </div>
-                      <div className="text-[0.4rem] md:text-[0.45rem] tracking-[0.1em] uppercase text-white mt-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medium">{stat.label}</div>
+                      <div className="text-[0.35rem] md:text-[0.45rem] tracking-[0.1em] uppercase text-white mt-0.5 drop-shadow-[0_2px_8px_rgba(0,0,0,1)] font-medium [text-shadow:0_1px_4px_rgba(0,0,0,1)]">{stat.label}</div>
                     </motion.div>
                   ))}
                 </div>
@@ -529,10 +530,10 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
       <div className="px-6 md:px-12 mb-12 text-[0.6rem] tracking-[0.3em] uppercase text-gold">Career Moments</div>
       <div 
         ref={containerRef} 
-        className="flex gap-8 w-max px-6 md:px-12"
+        className="flex gap-4 md:gap-8 w-max px-6 md:px-12"
       >
         {photos.map((photo, i) => (
-          <div key={i} className="relative w-[300px] md:w-[450px] h-[400px] md:h-[600px] bg-mid border border-albi/10 overflow-hidden group shrink-0">
+          <div key={i} className="relative w-[260px] md:w-[450px] h-[350px] md:h-[600px] border border-albi/10 overflow-hidden group shrink-0">
             {photo.image ? (
               <SafeImage 
                 src={photo.image} 
@@ -559,11 +560,11 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
 };
 
 const StatsRow = ({ stats }: { stats: any[] }) => (
-  <div className="bg-albi-deep px-6 md:px-12 py-16 grid grid-cols-2 md:grid-cols-5 border-y-[3px] border-gold">
+  <div className="bg-albi-deep px-6 md:px-12 py-12 md:py-16 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 border-y-[3px] border-gold">
     {stats.map((stat, i) => (
-      <div key={i} className={`text-center p-6 ${i !== stats.length - 1 ? 'md:border-r border-white/10' : ''}`}>
-        <div className="font-anton text-5xl text-gold leading-none mb-2">{stat.num}</div>
-        <div className="text-[0.55rem] tracking-[0.2em] uppercase text-white/70">{stat.label}</div>
+      <div key={i} className={`text-center p-4 md:p-6 ${i !== stats.length - 1 ? 'md:border-r border-white/10' : ''}`}>
+        <div className="font-anton text-4xl md:text-5xl text-gold leading-none mb-2">{stat.num}</div>
+        <div className="text-[0.5rem] md:text-[0.55rem] tracking-[0.2em] uppercase text-white/70">{stat.label}</div>
       </div>
     ))}
   </div>
@@ -583,12 +584,12 @@ const Trophies = ({ trophies }: { trophies: any[] }) => (
     </div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-albi/10">
       {trophies.map((trophy, i) => (
-        <div key={i} className="bg-dark relative group h-[350px] overflow-hidden border border-white/5">
+        <div key={i} className="relative group h-[280px] md:h-[350px] overflow-hidden border border-white/5">
           {trophy.imageUrl ? (
             <SafeImage 
               src={trophy.imageUrl} 
               alt={`${trophy.name} Trophy`} 
-              className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-40 group-hover:opacity-60"
+              className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700 opacity-40 group-hover:opacity-60"
               width={400}
               height={350}
             />
@@ -616,7 +617,7 @@ const Achievements = ({ achievements }: { achievements: any[] }) => (
       Individual Awards
     </div>
     <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">Personal<br/>Milestones</h2>
-    <div className="grid md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
       {achievements.map((item, i) => (
         <div key={i} className="bg-dark/50 p-8 border border-white/5 hover:border-gold/30 transition-colors">
           <div className="text-gold font-anton text-2xl mb-2">{item.year}</div>
@@ -684,12 +685,12 @@ const Social = ({ photos }: { photos: string[] }) => (
     <h2 className="font-anton text-5xl md:text-8xl leading-[0.9] uppercase tracking-tight mb-16">On Social</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
       {photos.map((img, i) => (
-        <div key={i} className="aspect-square bg-mid border border-albi/10 flex items-center justify-center text-[0.6rem] tracking-[0.2em] uppercase text-albi/20 group cursor-pointer overflow-hidden">
+        <div key={i} className="aspect-square border border-albi/10 flex items-center justify-center text-[0.6rem] tracking-[0.2em] uppercase text-albi/20 group cursor-pointer overflow-hidden">
           {img ? (
             <SafeImage 
               src={img} 
               alt={`Social Media Post ${i + 1}`} 
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               width={400}
               height={400}
             />
@@ -721,7 +722,7 @@ const Footer = ({ bgImage }: { bgImage: string }) => (
       <SafeImage 
         src={bgImage} 
         alt="Footer Background Image" 
-        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
+        className="w-full h-full object-cover transition-all duration-1000 scale-110 group-hover:scale-100"
         width={1920}
         height={600}
       />

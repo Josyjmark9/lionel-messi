@@ -23,14 +23,11 @@ import {
   Upload,
   Lock,
   LogIn,
-  LogOut,
-  Sparkles,
-  Loader2
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SafeImage from './SafeImage';
 import { User } from 'firebase/auth';
-import { removeBackground } from '@imgly/background-removal';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -90,11 +87,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   setAchievementsData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isRemovingBg, setIsRemovingBg] = useState(false);
 
   const isAuthorized = user?.email === ADMIN_EMAIL;
 
-  const compressImage = (base64Str: string, maxWidth = 1200, maxHeight = 1200): Promise<string> => {
+  const compressImage = (base64Str: string, maxWidth = 1000, maxHeight = 1000, forcePng = false): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = base64Str;
@@ -117,9 +113,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        const ctx = canvas.getContext('2d', { alpha: true });
+        
+        if (ctx) {
+          // Explicitly handle alpha channel
+          ctx.clearRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+        
+        // Use PNG for transparency if forced or if the source was PNG/WebP
+        const isTransparent = forcePng || base64Str.startsWith('data:image/png') || base64Str.startsWith('data:image/webp');
+        const outputType = isTransparent ? 'image/png' : 'image/jpeg';
+        const quality = isTransparent ? 1.0 : 0.7;
+          
+        resolve(canvas.toDataURL(outputType, quality));
       };
     });
   };
@@ -127,13 +134,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'footer' | 'profile') => {
     const file = e.target.files?.[0];
     if (file) {
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string);
+        const compressed = await compressImage(reader.result as string, 1000, 1000, isPng);
         if (type === 'hero') {
           setHeroData({ ...heroData, bgImage: compressed });
         } else if (type === 'profile') {
-          setHeroData({ ...heroData, profileImage: compressed });
+          // Always force PNG for profile image to preserve transparency
+          const forcePngCompressed = await compressImage(reader.result as string, 1000, 1000, true);
+          setHeroData({ ...heroData, profileImage: forcePngCompressed });
         } else {
           setFooterData({ ...footerData, bgImage: compressed });
         }
@@ -142,33 +152,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
-  const handleRemoveBackground = async () => {
-    if (!heroData.profileImage) return;
-    
-    setIsRemovingBg(true);
-    try {
-      const blob = await removeBackground(heroData.profileImage);
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const result = reader.result as string;
-        const compressed = await compressImage(result);
-        setHeroData({ ...heroData, profileImage: compressed });
-        setIsRemovingBg(false);
-      };
-      reader.readAsDataURL(blob);
-    } catch (error) {
-      console.error("Background removal failed:", error);
-      setIsRemovingBg(false);
-      alert("Background removal failed. Please try a clearer image.");
-    }
-  };
-
   const handlePhotoStripUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string);
+        const compressed = await compressImage(reader.result as string, 1000, 1000, isPng);
         const newData = [...photoStripData];
         newData[index] = { ...newData[index], image: compressed };
         setPhotoStripData(newData);
@@ -180,9 +170,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleSocialPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string);
+        const compressed = await compressImage(reader.result as string, 1000, 1000, isPng);
         const newData = [...socialPhotosData];
         newData[index] = compressed;
         setSocialPhotosData(newData);
@@ -194,9 +185,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleTrophyUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 800, 800);
+        const compressed = await compressImage(reader.result as string, 800, 800, isPng);
         const newData = [...trophiesData];
         newData[index] = { ...newData[index], imageUrl: compressed };
         setTrophiesData(newData);
@@ -507,9 +499,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="admin-card">
                     <h3 className="admin-label text-gold mb-6">Profile Image (Transparent BG)</h3>
                     <p className="text-[0.55rem] text-gray mb-4 italic">This image appears in the center of the hero section, behind the stats but in front of the scrolling name.</p>
-                    <div className="admin-img-slot relative overflow-hidden group">
+                    <div className="admin-img-slot relative overflow-hidden group bg-transparency-grid">
                       {heroData.profileImage ? (
-                        <SafeImage src={heroData.profileImage} alt="Profile Preview" className="w-full h-full object-contain opacity-50" />
+                        <SafeImage src={heroData.profileImage} alt="Profile Preview" className="w-full h-full object-contain" />
                       ) : (
                         <>
                           <Plus size={20} className="opacity-40" />
@@ -522,24 +514,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         onChange={(e) => handleFileUpload(e, 'profile')}
                         className="absolute inset-0 opacity-0 cursor-pointer"
                       />
-                    </div>
-                    
-                    <div className="mt-4 flex gap-3">
-                      <button 
-                        onClick={handleRemoveBackground}
-                        disabled={!heroData.profileImage || isRemovingBg}
-                        className="flex-1 bg-gold/10 text-gold border border-gold/20 py-2 rounded text-[0.55rem] tracking-widest uppercase hover:bg-gold/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isRemovingBg ? (
-                          <>
-                            <Loader2 size={12} className="animate-spin" /> Removing...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={12} /> Remove Background
-                          </>
-                        )}
-                      </button>
                     </div>
 
                     <div className="admin-field mt-4">
@@ -620,9 +594,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="https://..." 
                       className="admin-input" 
                     />
-                    <p className="text-[0.55rem] text-gray mt-2 italic">Paste a link to a vintage Lionel Messi image here. The footer will apply a glossy, grayscale-to-color transition on hover.</p>
+                    <p className="text-[0.55rem] text-gray mt-2 italic">Paste a link to a vintage Lionel Messi image here. The footer will apply a glossy, high-contrast transition on hover.</p>
                   </div>
-                  <div className="mt-4 aspect-video bg-mid border border-white/5 rounded overflow-hidden">
+                  <div className="mt-4 aspect-video border border-white/5 rounded overflow-hidden">
                     <SafeImage 
                       src={footerData.bgImage} 
                       alt="Footer Preview" 

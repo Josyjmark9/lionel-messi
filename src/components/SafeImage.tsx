@@ -31,9 +31,10 @@ const SafeImage: React.FC<SafeImageProps> = ({
       src={imgSrc}
       alt={alt || 'Image'}
       onError={handleError}
-      loading="lazy"
+      decoding="async"
       referrerPolicy="no-referrer"
       className={`${className} ${hasError ? 'opacity-50 grayscale' : ''}`}
+      style={{ backgroundColor: 'transparent', ...props.style }}
       {...props}
     />
   );
