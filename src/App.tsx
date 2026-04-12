@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 import { 
   Trophy, 
   Star, 
@@ -470,22 +474,46 @@ const Story = () => (
 );
 
 const PhotoStrip = ({ photos }: { photos: any[] }) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current || !containerRef.current) return;
+
+    const section = sectionRef.current;
+    const container = containerRef.current;
+
+    const ctx = gsap.context(() => {
+      const scrollWidth = container.scrollWidth;
+      const viewportWidth = window.innerWidth;
+      const xTranslation = -(scrollWidth - viewportWidth + 48); // 48 for padding
+
+      gsap.to(container, {
+        x: xTranslation,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          pin: true,
+          scrub: 1.5,
+          start: "top top",
+          end: () => `+=${scrollWidth}`,
+          invalidateOnRefresh: true,
+        }
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [photos]);
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 1, ease: "easeOut" }}
-      className="bg-black py-16 overflow-hidden"
-    >
-      <div className="px-6 md:px-12 mb-8 text-[0.6rem] tracking-[0.3em] uppercase text-gold">Career Moments</div>
-      <motion.div 
-        animate={{ x: [0, -1800] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        className="flex gap-6 w-max"
+    <section ref={sectionRef} className="bg-black h-screen flex flex-col justify-center overflow-hidden">
+      <div className="px-6 md:px-12 mb-12 text-[0.6rem] tracking-[0.3em] uppercase text-gold">Career Moments</div>
+      <div 
+        ref={containerRef} 
+        className="flex gap-8 w-max px-6 md:px-12"
       >
-        {[...photos, ...photos].map((photo, i) => (
-          <div key={i} className="relative w-[280px] h-[380px] bg-mid border border-albi/10 overflow-hidden group">
+        {photos.map((photo, i) => (
+          <div key={i} className="relative w-[300px] md:w-[450px] h-[400px] md:h-[600px] bg-mid border border-albi/10 overflow-hidden group shrink-0">
             {photo.image ? (
               <img 
                 src={photo.image} 
@@ -499,14 +527,14 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
                 <span className="text-center">{photo.title}<br/>Photo Slot</span>
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-5 flex flex-col justify-end">
-              <div className="text-[0.55rem] tracking-[0.2em] uppercase text-gold mb-1">{photo.year}</div>
-              <div className="font-anton text-lg tracking-wider uppercase">{photo.title}</div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-8 flex flex-col justify-end">
+              <div className="text-[0.6rem] tracking-[0.2em] uppercase text-gold mb-2">{photo.year}</div>
+              <div className="font-anton text-2xl md:text-4xl tracking-wider uppercase leading-none">{photo.title}</div>
             </div>
           </div>
         ))}
-      </motion.div>
-    </motion.div>
+      </div>
+    </section>
   );
 };
 
