@@ -91,8 +91,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   setPartnersData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  const isAuthorized = user?.email === ADMIN_EMAIL;
+  const isAuthorized = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+  const handleLogin = async () => {
+    try {
+      setLoginError(null);
+      await onLogin();
+    } catch (error: any) {
+      if (error.code === 'auth/popup-blocked') {
+        setLoginError("Popup was blocked by your browser. Please allow popups for this site.");
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        setLoginError("The sign-in window was closed before completion.");
+      } else {
+        setLoginError("An error occurred during sign-in. Please try again.");
+      }
+    }
+  };
 
   const compressImage = (base64Str: string, maxWidth = 1000, maxHeight = 1000, forcePng = false): Promise<string> => {
     return new Promise((resolve) => {
@@ -266,12 +282,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
               </button>
             </div>
           ) : (
-            <button 
-              onClick={onLogin}
-              className="w-full bg-gold text-black py-3 rounded font-bold text-[0.7rem] tracking-widest uppercase hover:bg-gold-light transition-all flex items-center justify-center gap-2"
-            >
-              <LogIn size={14} /> Sign In with Google
-            </button>
+            <div className="space-y-4">
+              {loginError && (
+                <div className="p-3 bg-red/10 border border-red/20 rounded text-red text-[0.65rem] mb-4">
+                  {loginError}
+                </div>
+              )}
+              <button 
+                onClick={handleLogin}
+                className="w-full bg-gold text-black py-3 rounded font-bold text-[0.7rem] tracking-widest uppercase hover:bg-gold-light transition-all flex items-center justify-center gap-2"
+              >
+                <LogIn size={14} /> Sign In with Google
+              </button>
+            </div>
           )}
           
           <button 

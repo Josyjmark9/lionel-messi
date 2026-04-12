@@ -12,8 +12,6 @@ export const googleProvider = new GoogleAuthProvider();
 // Auth Helpers
 export const loginWithGoogle = async () => {
   try {
-    // Small delay to ensure the browser context is stable for popups
-    await new Promise(resolve => setTimeout(resolve, 100));
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
