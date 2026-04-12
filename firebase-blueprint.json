@@ -88,6 +88,16 @@
         "socialPhotos": {
           "type": "array",
           "items": { "type": "string" }
+        },
+        "partners": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "logo": { "type": "string" }
+            }
+          }
         }
       }
     }

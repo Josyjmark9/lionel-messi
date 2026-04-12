@@ -101,19 +101,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     try {
       setIsLoggingIn(true);
       setLoginError(null);
-      await onLogin();
+      console.log("Attempting login...");
+      const result = await onLogin();
+      console.log("Login result:", result);
     } catch (error: any) {
       console.error("Admin Login Catch:", error);
-      if (error.code === 'auth/popup-blocked') {
+      const errorCode = error?.code || error?.message || "unknown_error";
+      
+      if (errorCode === 'auth/popup-blocked') {
         setLoginError("Popup was blocked by your browser. Please allow popups for this site.");
-      } else if (error.code === 'auth/popup-closed-by-user') {
+      } else if (errorCode === 'auth/popup-closed-by-user') {
         setLoginError("The sign-in window was closed before completion.");
-      } else if (error.code === 'auth/unauthorized-domain') {
-        setLoginError(`Domain Unauthorized: This domain is not authorized in Firebase. Error Code: ${error.code}`);
-      } else if (error.code === 'auth/operation-not-allowed') {
+      } else if (errorCode === 'auth/unauthorized-domain') {
+        setLoginError(`Domain Unauthorized: This domain is not authorized in Firebase. Code: ${errorCode}`);
+      } else if (errorCode === 'auth/operation-not-allowed') {
         setLoginError("Google Sign-In is not enabled in the Firebase Console.");
       } else {
-        setLoginError(`Sign-in Error: ${error.message || 'Unknown error'} (Code: ${error.code || 'N/A'})`);
+        // Stringify the error to see everything
+        const errorString = typeof error === 'object' ? JSON.stringify(error) : String(error);
+        setLoginError(`Sign-in Error: ${errorString.substring(0, 100)}... (Code: ${errorCode})`);
       }
     } finally {
       setIsLoggingIn(false);
@@ -276,6 +282,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           <h2 className="font-anton text-2xl text-white mb-2 uppercase tracking-wider">Restricted Access</h2>
           <p className="text-gray text-xs mb-8 leading-relaxed">
             This area is reserved for the site administrator. Please sign in with the authorized account to continue.
+            <br/><br/>
+            <span className="text-gold opacity-50 italic">If you see an error, please try a <strong>Hard Refresh</strong> (Ctrl+F5 or Cmd+Shift+R).</span>
           </p>
           
           {user ? (
@@ -340,6 +348,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         <div className="p-6 border-bottom border-gold/15">
           <div className="font-bebas text-2xl text-gold tracking-widest leading-none mb-1">LM · 10</div>
           <div className="text-[0.6rem] tracking-[0.2em] uppercase text-gray">Website Admin Panel</div>
+          <div className="text-[0.4rem] text-gray/40 mt-1 uppercase tracking-widest">Build: 2026.04.12.v3</div>
         </div>
 
         <div className="flex-1 py-4">
