@@ -20,14 +20,24 @@ import {
   GripVertical,
   Star,
   Settings,
-  Upload
+  Upload,
+  Lock,
+  LogIn,
+  LogOut,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SafeImage from './SafeImage';
+import { User } from 'firebase/auth';
+import { removeBackground } from '@imgly/background-removal';
 
 interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  user: User | null;
+  onLogin: () => void;
+  onLogout: () => void;
   heroData: any;
   setHeroData: (data: any) => void;
   quoteData: any;
@@ -50,9 +60,14 @@ interface AdminPanelProps {
   setAchievementsData: (data: any[]) => void;
 }
 
+const ADMIN_EMAIL = "josiahjohnmark9@gmail.com";
+
 const AdminPanel: React.FC<AdminPanelProps> = ({ 
   isOpen, 
   onClose, 
+  user,
+  onLogin,
+  onLogout,
   heroData, 
   setHeroData, 
   quoteData, 
@@ -75,21 +90,76 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   setAchievementsData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'footer' | 'profile') => {
+  const isAuthorized = user?.email === ADMIN_EMAIL;
+
+  const compressImage = (base64Str: string, maxWidth = 1200, maxHeight = 1200): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'footer' | 'profile') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
         if (type === 'hero') {
-          setHeroData({ ...heroData, bgImage: reader.result as string });
+          setHeroData({ ...heroData, bgImage: compressed });
         } else if (type === 'profile') {
-          setHeroData({ ...heroData, profileImage: reader.result as string });
+          setHeroData({ ...heroData, profileImage: compressed });
         } else {
-          setFooterData({ ...footerData, bgImage: reader.result as string });
+          setFooterData({ ...footerData, bgImage: compressed });
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveBackground = async () => {
+    if (!heroData.profileImage) return;
+    
+    setIsRemovingBg(true);
+    try {
+      const blob = await removeBackground(heroData.profileImage);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const result = reader.result as string;
+        const compressed = await compressImage(result);
+        setHeroData({ ...heroData, profileImage: compressed });
+        setIsRemovingBg(false);
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error("Background removal failed:", error);
+      setIsRemovingBg(false);
+      alert("Background removal failed. Please try a clearer image.");
     }
   };
 
@@ -97,9 +167,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
         const newData = [...photoStripData];
-        newData[index] = { ...newData[index], image: reader.result as string };
+        newData[index] = { ...newData[index], image: compressed };
         setPhotoStripData(newData);
       };
       reader.readAsDataURL(file);
@@ -110,9 +181,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
         const newData = [...socialPhotosData];
-        newData[index] = reader.result as string;
+        newData[index] = compressed;
         setSocialPhotosData(newData);
       };
       reader.readAsDataURL(file);
@@ -123,9 +195,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 800, 800);
         const newData = [...trophiesData];
-        newData[index] = { ...newData[index], imageUrl: reader.result as string };
+        newData[index] = { ...newData[index], imageUrl: compressed };
         setTrophiesData(newData);
       };
       reader.readAsDataURL(file);
@@ -150,6 +223,56 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   ];
 
   if (!isOpen) return null;
+
+  if (!isAuthorized) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[500] bg-black flex items-center justify-center p-6"
+      >
+        <div className="max-w-md w-full bg-dark border border-gold/20 p-8 rounded-lg text-center">
+          <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Lock className="text-gold" size={32} />
+          </div>
+          <h2 className="font-anton text-2xl text-white mb-2 uppercase tracking-wider">Restricted Access</h2>
+          <p className="text-gray text-xs mb-8 leading-relaxed">
+            This area is reserved for the site administrator. Please sign in with the authorized account to continue.
+          </p>
+          
+          {user ? (
+            <div className="space-y-4">
+              <div className="p-3 bg-red/10 border border-red/20 rounded text-red text-[0.65rem] mb-4">
+                Logged in as: {user.email}<br/>
+                This account is not authorized.
+              </div>
+              <button 
+                onClick={onLogout}
+                className="w-full bg-white/5 border border-white/10 text-white py-3 rounded font-bold text-[0.7rem] tracking-widest uppercase hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+              >
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={onLogin}
+              className="w-full bg-gold text-black py-3 rounded font-bold text-[0.7rem] tracking-widest uppercase hover:bg-gold-light transition-all flex items-center justify-center gap-2"
+            >
+              <LogIn size={14} /> Sign In with Google
+            </button>
+          )}
+          
+          <button 
+            onClick={onClose}
+            className="mt-6 text-gray hover:text-white text-[0.6rem] uppercase tracking-[0.2em] transition-colors"
+          >
+            Cancel and Return
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div 
@@ -204,11 +327,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
 
         <div className="p-6 border-t border-gold/15">
-          <div className="text-[0.55rem] tracking-widest uppercase text-gray leading-relaxed">
-            Website built by<br/>
-            <strong className="text-gold text-[0.65rem] block">Josiah Johnmark</strong>
-            <span className="text-albi">Creative Developer</span>
+          <div className="flex items-center gap-3 mb-4">
+            <img src={user?.photoURL || ''} alt="" className="w-8 h-8 rounded-full border border-gold/20" />
+            <div className="overflow-hidden">
+              <div className="text-[0.6rem] text-white font-bold truncate">{user?.displayName}</div>
+              <div className="text-[0.5rem] text-gray truncate">{user?.email}</div>
+            </div>
           </div>
+          <button 
+            onClick={onLogout}
+            className="w-full bg-white/5 border border-white/10 text-white py-2 rounded text-[0.55rem] tracking-widest uppercase hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+          >
+            <LogOut size={10} /> Logout
+          </button>
         </div>
       </aside>
 
@@ -392,6 +523,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="absolute inset-0 opacity-0 cursor-pointer"
                       />
                     </div>
+                    
+                    <div className="mt-4 flex gap-3">
+                      <button 
+                        onClick={handleRemoveBackground}
+                        disabled={!heroData.profileImage || isRemovingBg}
+                        className="flex-1 bg-gold/10 text-gold border border-gold/20 py-2 rounded text-[0.55rem] tracking-widest uppercase hover:bg-gold/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isRemovingBg ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin" /> Removing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={12} /> Remove Background
+                          </>
+                        )}
+                      </button>
+                    </div>
+
                     <div className="admin-field mt-4">
                       <label className="admin-label">Or paste image URL</label>
                       <input 
