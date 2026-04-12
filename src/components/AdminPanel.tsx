@@ -118,6 +118,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  const handleTrophyUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newData = [...trophiesData];
+        newData[index] = { ...newData[index], imageUrl: reader.result as string };
+        setTrophiesData(newData);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={14} /> },
     { id: 'hero', label: 'Hero Section', icon: <Type size={14} /> },
@@ -583,32 +596,63 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Trash2 size={14} />
                       </button>
                       <div className="grid gap-4">
-                        <div className="grid grid-cols-[80px_1fr] gap-4">
-                          <div className="admin-field">
-                            <label className="admin-label">Count</label>
-                            <input 
-                              type="text" 
-                              value={trophy.count}
-                              onChange={(e) => {
-                                const newData = [...trophiesData];
-                                newData[i] = { ...newData[i], count: e.target.value };
-                                setTrophiesData(newData);
-                              }}
-                              className="admin-input" 
-                            />
+                        <div className="grid grid-cols-[120px_1fr] gap-4">
+                          <div className="space-y-4">
+                            <div className="admin-img-slot h-24 relative overflow-hidden group">
+                              {trophy.imageUrl ? (
+                                <img src={trophy.imageUrl} alt={trophy.name} className="w-full h-full object-contain opacity-50" />
+                              ) : (
+                                <Trophy size={20} className="opacity-40" />
+                              )}
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={(e) => handleTrophyUpload(e, i)}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                            </div>
+                            <div className="admin-field">
+                              <label className="admin-label">Count</label>
+                              <input 
+                                type="text" 
+                                value={trophy.count}
+                                onChange={(e) => {
+                                  const newData = [...trophiesData];
+                                  newData[i] = { ...newData[i], count: e.target.value };
+                                  setTrophiesData(newData);
+                                }}
+                                className="admin-input" 
+                              />
+                            </div>
                           </div>
-                          <div className="admin-field">
-                            <label className="admin-label">Icon (Emoji)</label>
-                            <input 
-                              type="text" 
-                              value={trophy.icon}
-                              onChange={(e) => {
-                                const newData = [...trophiesData];
-                                newData[i] = { ...newData[i], icon: e.target.value };
-                                setTrophiesData(newData);
-                              }}
-                              className="admin-input" 
-                            />
+                          <div className="space-y-4">
+                            <div className="admin-field">
+                              <label className="admin-label">Trophy Image URL</label>
+                              <input 
+                                type="url" 
+                                value={trophy.imageUrl || ''}
+                                onChange={(e) => {
+                                  const newData = [...trophiesData];
+                                  newData[i] = { ...newData[i], imageUrl: e.target.value };
+                                  setTrophiesData(newData);
+                                }}
+                                placeholder="https://..."
+                                className="admin-input" 
+                              />
+                            </div>
+                            <div className="admin-field">
+                              <label className="admin-label">Fallback Icon (Emoji)</label>
+                              <input 
+                                type="text" 
+                                value={trophy.icon}
+                                onChange={(e) => {
+                                  const newData = [...trophiesData];
+                                  newData[i] = { ...newData[i], icon: e.target.value };
+                                  setTrophiesData(newData);
+                                }}
+                                className="admin-input" 
+                              />
+                            </div>
                           </div>
                         </div>
                         <div className="admin-field">

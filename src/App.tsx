@@ -535,11 +535,25 @@ const Trophies = ({ trophies }: { trophies: any[] }) => (
     </div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-albi/10">
       {trophies.map((trophy, i) => (
-        <div key={i} className="bg-dark p-8 relative group hover:bg-mid transition-colors">
-          <div className="absolute top-6 right-6 text-2xl opacity-15">{trophy.icon}</div>
-          <div className="font-anton text-6xl text-gold leading-none mb-2">{trophy.count}</div>
-          <div className="text-[0.7rem] tracking-widest uppercase text-white mb-1">{trophy.name}</div>
-          <div className="text-[0.6rem] text-gray leading-relaxed">{trophy.desc}</div>
+        <div key={i} className="bg-dark relative group h-[350px] overflow-hidden border border-white/5">
+          {trophy.imageUrl ? (
+            <img 
+              src={trophy.imageUrl} 
+              alt={trophy.name} 
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-40 group-hover:opacity-60"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-mid/30">
+              <div className="text-4xl opacity-10">{trophy.icon}</div>
+            </div>
+          )}
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-8 flex flex-col justify-end">
+            <div className="font-anton text-6xl text-gold leading-none mb-2 drop-shadow-[0_0_15px_rgba(201,168,76,0.5)]">{trophy.count}</div>
+            <div className="text-[0.75rem] tracking-[0.15em] font-anton uppercase text-white mb-1">{trophy.name}</div>
+            <div className="text-[0.6rem] text-gray leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500 line-clamp-2">{trophy.desc}</div>
+          </div>
         </div>
       ))}
     </div>
@@ -732,14 +746,14 @@ export default function App() {
   ]);
 
   const [trophiesData, setTrophiesData] = useState([
-    { count: '8×', name: "Ballon d'Or", desc: "2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023", icon: "⭐" },
-    { count: '1×', name: "FIFA World Cup", desc: "Qatar 2022 — Player of the Tournament", icon: "🏆" },
-    { count: '3×', name: "Copa América", desc: "2021 (Brazil), 2024 (USA), 2019 (runner-up)", icon: "🥇" },
-    { count: '4×', name: "Champions League", desc: "2006, 2009, 2011, 2015 with FC Barcelona", icon: "🏅" },
-    { count: '10×', name: "La Liga", desc: "All 10 titles won with FC Barcelona", icon: "🇪🇸" },
-    { count: '7×', name: "Copa del Rey", desc: "Spain's domestic cup — FC Barcelona era", icon: "🏟" },
-    { count: '3×', name: "Club World Cup", desc: "FIFA Club World Cup champion", icon: "🌍" },
-    { count: '6×', name: "European Golden Shoe", desc: "Top scorer in European leagues — record 6 times", icon: "⚽" }
+    { count: '8×', name: "Ballon d'Or", desc: "2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023", icon: "⭐", imageUrl: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1000&auto=format&fit=crop" },
+    { count: '1×', name: "FIFA World Cup", desc: "Qatar 2022 — Player of the Tournament", icon: "🏆", imageUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=1000&auto=format&fit=crop" },
+    { count: '3×', name: "Copa América", desc: "2021 (Brazil), 2024 (USA), 2019 (runner-up)", icon: "🥇", imageUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1000&auto=format&fit=crop" },
+    { count: '4×', name: "Champions League", desc: "2006, 2009, 2011, 2015 with FC Barcelona", icon: "🏅", imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000&auto=format&fit=crop" },
+    { count: '10×', name: "La Liga", desc: "All 10 titles won with FC Barcelona", icon: "🇪🇸", imageUrl: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=1000&auto=format&fit=crop" },
+    { count: '7×', name: "Copa del Rey", desc: "Spain's domestic cup — FC Barcelona era", icon: "🏟", imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop" },
+    { count: '3×', name: "Club World Cup", desc: "FIFA Club World Cup champion", icon: "🌍", imageUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=1000&auto=format&fit=crop" },
+    { count: '6×', name: "European Golden Shoe", desc: "Top scorer in European leagues — record 6 times", icon: "⚽", imageUrl: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1000&auto=format&fit=crop" }
   ]);
 
   const [timelineData, setTimelineData] = useState([
