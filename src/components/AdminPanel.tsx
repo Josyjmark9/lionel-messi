@@ -57,6 +57,8 @@ interface AdminPanelProps {
   setAchievementsData: (data: any[]) => void;
   partnersData: any[];
   setPartnersData: (data: any[]) => void;
+  signatureData: string;
+  setSignatureData: (data: string) => void;
 }
 
 const ADMIN_EMAIL = "josiahjohnmark9@gmail.com";
@@ -88,7 +90,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   achievementsData,
   setAchievementsData,
   partnersData,
-  setPartnersData
+  setPartnersData,
+  signatureData,
+  setSignatureData
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -152,12 +156,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         const ctx = canvas.getContext('2d', { alpha: true });
         
         if (ctx) {
-          // Explicitly handle alpha channel
           ctx.clearRect(0, 0, width, height);
           ctx.drawImage(img, 0, 0, width, height);
         }
         
         // Use PNG for transparency if forced or if the source was PNG/WebP
+        // For signature and logos, we ALWAYS want to preserve transparency if possible
         const isTransparent = forcePng || base64Str.startsWith('data:image/png') || base64Str.startsWith('data:image/webp');
         const outputType = isTransparent ? 'image/png' : 'image/jpeg';
         const quality = isTransparent ? 1.0 : 0.7;
@@ -236,13 +240,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handlePartnerUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
-      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 400, 400, isPng);
+        const compressed = await compressImage(reader.result as string, 400, 400, true);
         const newData = [...partnersData];
         newData[index] = { ...newData[index], logo: compressed };
         setPartnersData(newData);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 1200, 600, true);
+        setSignatureData(compressed);
       };
       reader.readAsDataURL(file);
     }
@@ -258,6 +273,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     { id: 'timeline', label: 'Career Timeline', icon: <History size={14} /> },
     { id: 'stats', label: 'Stats Bar', icon: <BarChart3 size={14} /> },
     { id: 'partners', label: 'Partners & Brands', icon: <Users size={14} /> },
+    { id: 'signature', label: 'Official Signature', icon: <Palette size={14} /> },
     { id: 'social', label: 'Social Media', icon: <Share2 size={14} /> },
     { id: 'nav-footer', label: 'Nav & Footer', icon: <Menu size={14} /> },
     { id: 'colours', label: 'Colours & Fonts', icon: <Palette size={14} /> },
@@ -1043,6 +1059,66 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                     </div>
                   ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'signature' && (
+              <motion.div 
+                key="signature"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-2xl space-y-6"
+              >
+                <div className="admin-card">
+                  <h3 className="admin-label text-gold mb-6">Official Signature</h3>
+                  <div className="space-y-6">
+                    <div className="admin-field">
+                      <label className="admin-label">Signature Image (Transparent PNG recommended)</label>
+                      <div className="admin-img-slot h-48 relative overflow-hidden group bg-transparency-grid">
+                        {signatureData ? (
+                          <SafeImage src={signatureData} alt="Signature Preview" className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 opacity-40">
+                            <Palette size={32} />
+                            <span className="text-[0.5rem] uppercase tracking-widest">No Signature Uploaded</span>
+                          </div>
+                        )}
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleSignatureUpload}
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                          <div className="flex items-center gap-2 text-white text-[0.6rem] font-bold uppercase tracking-widest">
+                            <Upload size={14} /> Change Signature
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[0.5rem] text-gray mt-2">Upload a high-resolution signature with the background removed. It will be displayed in the "Mark of Greatness" section.</p>
+                    </div>
+                    
+                    <div className="admin-field">
+                      <label className="admin-label">Signature URL (Alternative)</label>
+                      <input 
+                        type="url" 
+                        value={signatureData}
+                        onChange={(e) => setSignatureData(e.target.value)}
+                        placeholder="https://..."
+                        className="admin-input" 
+                      />
+                    </div>
+
+                    {signatureData && (
+                      <button 
+                        onClick={() => setSignatureData('')}
+                        className="text-red text-[0.55rem] uppercase tracking-widest font-bold hover:underline"
+                      >
+                        Remove Signature
+                      </button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -560,15 +560,106 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
   );
 };
 
-const StatsRow = ({ stats }: { stats: any[] }) => (
-  <div className="bg-albi-deep px-6 md:px-12 py-12 md:py-16 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 border-y-[3px] border-gold">
-    {stats.map((stat, i) => (
-      <div key={i} className={`text-center p-4 md:p-6 ${i !== stats.length - 1 ? 'md:border-r border-white/10' : ''}`}>
-        <div className="font-anton text-4xl md:text-5xl text-gold leading-none mb-2">{stat.num}</div>
-        <div className="text-[0.5rem] md:text-[0.55rem] tracking-[0.2em] uppercase text-white/70">{stat.label}</div>
+const SignatureSection = ({ signature }: { signature: string }) => (
+  <section className="bg-albi-deep px-6 md:px-12 py-20 md:py-32 border-y-[3px] border-gold relative overflow-hidden flex items-center justify-center">
+    {/* Background Atmosphere */}
+    <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.2)_0%,transparent_70%)]" />
+      <motion.div 
+        animate={{ 
+          opacity: [0.05, 0.1, 0.05],
+          scale: [1, 1.05, 1]
+        }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5"
+      />
+    </div>
+
+    <div className="relative z-10 max-w-4xl w-full flex flex-col items-center">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="flex items-center gap-4 mb-8 text-[0.6rem] tracking-[0.4em] uppercase text-gold/60"
+      >
+        <div className="w-12 h-px bg-gold/30" />
+        The Mark of Greatness
+        <div className="w-12 h-px bg-gold/30" />
+      </motion.div>
+      
+      <div className="relative group">
+        {signature ? (
+          <div className="relative">
+            {/* Subtle glow pulse behind signature */}
+            <motion.div 
+              animate={{ 
+                opacity: [0.3, 0.6, 0.3],
+                scale: [0.9, 1.1, 0.9]
+              }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-0 bg-gold/15 blur-[80px] rounded-full"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, rotate: -3 }}
+              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+              className="relative"
+            >
+              <motion.div
+                animate={{ 
+                  y: [0, -8, 0],
+                  rotate: [0, 0.5, 0, -0.5, 0]
+                }}
+                transition={{ 
+                  duration: 6, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+                className="relative overflow-hidden"
+              >
+                <SafeImage 
+                  src={signature} 
+                  alt="Lionel Messi Signature" 
+                  className="max-h-[200px] md:max-h-[350px] w-auto object-contain drop-shadow-[0_0_40px_rgba(201,168,76,0.4)] filter brightness-110"
+                  width={800}
+                  height={400}
+                />
+                
+                {/* Shimmer Sweep Effect */}
+                <motion.div 
+                  animate={{ 
+                    left: ['-150%', '250%']
+                  }}
+                  transition={{ 
+                    duration: 4, 
+                    repeat: Infinity, 
+                    repeatDelay: 6,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-25deg] pointer-events-none"
+                />
+              </motion.div>
+            </motion.div>
+          </div>
+        ) : (
+          <div className="h-[200px] md:h-[300px] flex items-center justify-center text-gold/20 font-anton text-4xl uppercase tracking-[0.2em] border-2 border-dashed border-gold/10 px-20">
+            Signature Space
+          </div>
+        )}
       </div>
-    ))}
-  </div>
+      
+      <motion.div 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 1 }}
+        className="mt-12 text-center"
+      >
+        <div className="font-anton text-2xl md:text-3xl text-white tracking-widest uppercase mb-2">Lionel Messi</div>
+        <div className="text-[0.6rem] tracking-[0.3em] uppercase text-gold">Official Signature</div>
+      </motion.div>
+    </div>
+  </section>
 );
 
 const Trophies = ({ trophies }: { trophies: any[] }) => (
@@ -704,7 +795,7 @@ const Social = ({ photos }: { photos: string[] }) => (
             <SafeImage 
               src={img} 
               alt={`Social Media Post ${i + 1}`} 
-              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-90 transition-all duration-700 ease-out"
               width={400}
               height={400}
             />
@@ -782,11 +873,60 @@ const Footer = ({ bgImage }: { bgImage: string }) => (
 
 // --- Main App ---
 
+const Preloader = () => (
+  <motion.div 
+    initial={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 1, ease: "easeInOut" }}
+    className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center"
+  >
+    <div className="relative">
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.1, 1],
+          opacity: [0.3, 0.6, 0.3]
+        }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 bg-gold/20 blur-[60px] rounded-full"
+      />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="font-anton text-7xl md:text-9xl text-gold leading-none tracking-tighter text-center relative z-10"
+      >
+        LM<br/>10
+      </motion.div>
+    </div>
+    <motion.div 
+      initial={{ width: 0 }}
+      animate={{ width: "120px" }}
+      transition={{ duration: 2, ease: "easeInOut" }}
+      className="h-[2px] bg-gold mt-8 relative overflow-hidden"
+    >
+      <motion.div 
+        animate={{ left: ["-100%", "100%"] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 bg-white/40"
+      />
+    </motion.div>
+    <motion.p 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.4 }}
+      transition={{ delay: 0.5 }}
+      className="text-[0.5rem] tracking-[0.4em] uppercase text-gold mt-4"
+    >
+      Authenticating Greatness
+    </motion.p>
+  </motion.div>
+);
+
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const [heroData, setHeroData] = useState({
     name1: 'Lionel',
@@ -873,6 +1013,8 @@ export default function App() {
     { name: 'Socios', logo: '' }
   ]);
 
+  const [signatureData, setSignatureData] = useState('');
+
   const [socialPhotosData, setSocialPhotosData] = useState(['', '', '', '', '', '']);
 
   // Auth Listener
@@ -890,6 +1032,9 @@ export default function App() {
 
     const configDoc = doc(db, 'config', 'main');
     const unsubscribe = onSnapshot(configDoc, (snapshot) => {
+      // Ignore snapshots with pending writes to avoid overwriting local state during upload
+      if (snapshot.metadata.hasPendingWrites) return;
+
       if (snapshot.exists()) {
         const data = snapshot.data();
         if (data.hero) setHeroData(data.hero);
@@ -903,9 +1048,12 @@ export default function App() {
         if (data.achievements) setAchievementsData(data.achievements);
         if (data.socialPhotos) setSocialPhotosData(data.socialPhotos);
         if (data.partners) setPartnersData(data.partners);
+        if (data.signature !== undefined) setSignatureData(data.signature);
       }
+      setIsDataLoaded(true);
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, 'config/main');
+      setIsDataLoaded(true); // Still show app even if error
     });
 
     return () => unsubscribe();
@@ -959,6 +1107,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-gold selection:text-black cursor-none">
+      <AnimatePresence>
+        {!isDataLoaded && <Preloader key="preloader" />}
+      </AnimatePresence>
+
       <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       <CustomCursor />
       <Navbar onLogoClick={handleLogoClick} />
@@ -986,7 +1138,7 @@ export default function App() {
           viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
-          <StatsRow stats={statsData} />
+          <SignatureSection signature={signatureData} />
         </motion.div>
         
         <motion.div 
@@ -1089,6 +1241,8 @@ export default function App() {
             setAchievementsData={(data) => { setAchievementsData(data); saveToFirebase({ achievements: data }); }}
             partnersData={partnersData}
             setPartnersData={(data) => { setPartnersData(data); saveToFirebase({ partners: data }); }}
+            signatureData={signatureData}
+            setSignatureData={(data) => { setSignatureData(data); saveToFirebase({ signature: data }); }}
           />
         )}
       </AnimatePresence>

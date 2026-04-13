@@ -98,7 +98,8 @@
               "logo": { "type": "string" }
             }
           }
-        }
+        },
+        "signature": { "type": "string" }
       }
     }
   },
