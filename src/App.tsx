@@ -498,6 +498,15 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'globe': return <Globe className="w-10 h-10 text-albi opacity-30" />;
+      case 'star': return <Star className="w-10 h-10 text-gold opacity-30" />;
+      case 'trophy': return <Trophy className="w-10 h-10 text-albi opacity-30" />;
+      default: return <Star className="w-10 h-10 text-gold opacity-30" />;
+    }
+  };
+
   useEffect(() => {
     if (!sectionRef.current || !containerRef.current) return;
 
@@ -545,7 +554,7 @@ const PhotoStrip = ({ photos }: { photos: any[] }) => {
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[0.6rem] tracking-widest uppercase text-albi/30">
-                {photo.icon}
+                {getIcon(photo.icon)}
                 <span className="text-center">{photo.title}<br/>Photo Slot</span>
               </div>
             )}
@@ -954,12 +963,12 @@ export default function App() {
   });
 
   const [photoStripData, setPhotoStripData] = useState([
-    { year: 'Qatar · 2022', title: 'World Cup Glory', icon: <Globe className="w-10 h-10 text-albi opacity-30" />, image: '' },
-    { year: 'Paris · 2023', title: '8th Ballon d\'Or', icon: <Star className="w-10 h-10 text-gold opacity-30" />, image: '' },
-    { year: 'Berlin · 2015', title: 'UCL Treble', icon: <Trophy className="w-10 h-10 text-albi opacity-30" />, image: '' },
-    { year: 'Brazil · 2021', title: 'Copa América Win', icon: <Globe className="w-10 h-10 text-gold opacity-30" />, image: '' },
-    { year: 'Miami · 2023', title: 'MLS Debut', icon: <Star className="w-10 h-10 text-albi opacity-30" />, image: '' },
-    { year: 'Camp Nou · 2012', title: '91 Goals Season', icon: <Trophy className="w-10 h-10 text-gold opacity-30" />, image: '' },
+    { year: 'Qatar · 2022', title: 'World Cup Glory', icon: 'globe', image: '' },
+    { year: 'Paris · 2023', title: '8th Ballon d\'Or', icon: 'star', image: '' },
+    { year: 'Berlin · 2015', title: 'UCL Treble', icon: 'trophy', image: '' },
+    { year: 'Brazil · 2021', title: 'Copa América Win', icon: 'globe', image: '' },
+    { year: 'Miami · 2023', title: 'MLS Debut', icon: 'star', image: '' },
+    { year: 'Camp Nou · 2012', title: '91 Goals Season', icon: 'trophy', image: '' },
   ]);
 
   const [trophiesData, setTrophiesData] = useState([
