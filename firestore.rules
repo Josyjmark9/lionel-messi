@@ -12,12 +12,18 @@ service cloud.firestore {
     //   - hero: object (name1, name2, tag, bgImage, profileImage)
     //   - quote: object (text, attr)
     //   - footer: object (bgImage)
-    //   - photoStrip: list of objects
     //   - trophies: list of objects
     //   - timeline: list of objects
     //   - stats: list of objects
     //   - achievements: list of objects
+    //   - seo: object
+    //
+    // Document ID: media
+    // Fields:
+    //   - photoStrip: list of objects
     //   - socialPhotos: list of strings
+    //   - partners: list of objects
+    //   - signature: string (base64)
     //
     // ===============================================================
 
@@ -31,7 +37,7 @@ service cloud.firestore {
         (request.auth.token.email == "josiahjohnmark9@gmail.com" && request.auth.token.email_verified == true);
     }
 
-    match /config/main {
+    match /config/{document} {
       // Anyone can read the site configuration
       allow read: if true;
       

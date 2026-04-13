@@ -918,6 +918,14 @@ const Preloader = () => (
     >
       Authenticating Greatness
     </motion.p>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.2 }}
+      transition={{ delay: 1.5 }}
+      className="absolute bottom-12 text-[0.45rem] tracking-[0.5em] uppercase text-white/50"
+    >
+      Site Crafted by <span className="text-gold">Johnmark</span>
+    </motion.div>
   </motion.div>
 );
 
@@ -1030,42 +1038,78 @@ export default function App() {
   useEffect(() => {
     if (!isAuthReady) return;
 
-    const configDoc = doc(db, 'config', 'main');
-    const unsubscribe = onSnapshot(configDoc, (snapshot) => {
-      // Ignore snapshots with pending writes to avoid overwriting local state during upload
-      if (snapshot.metadata.hasPendingWrites) return;
+    const mainDoc = doc(db, 'config', 'main');
+    const mediaDoc = doc(db, 'config', 'media');
+    
+    let mainLoaded = false;
+    let mediaLoaded = false;
 
+    const checkLoaded = () => {
+      if (mainLoaded && mediaLoaded) {
+        setIsDataLoaded(true);
+      }
+    };
+
+    const unsubMain = onSnapshot(mainDoc, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
       if (snapshot.exists()) {
         const data = snapshot.data();
         if (data.hero) setHeroData(data.hero);
         if (data.quote) setQuoteData(data.quote);
         if (data.footer) setFooterData(data.footer);
-        if (data.photoStrip) setPhotoStripData(data.photoStrip);
         if (data.trophies) setTrophiesData(data.trophies);
         if (data.timeline) setTimelineData(data.timeline);
         if (data.stats) setStatsData(data.stats);
         if (data.seo) setSeoData(data.seo);
         if (data.achievements) setAchievementsData(data.achievements);
+      }
+      mainLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'config/main');
+      mainLoaded = true;
+      checkLoaded();
+    });
+
+    const unsubMedia = onSnapshot(mediaDoc, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.photoStrip) setPhotoStripData(data.photoStrip);
         if (data.socialPhotos) setSocialPhotosData(data.socialPhotos);
         if (data.partners) setPartnersData(data.partners);
         if (data.signature !== undefined) setSignatureData(data.signature);
       }
-      setIsDataLoaded(true);
+      mediaLoaded = true;
+      checkLoaded();
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, 'config/main');
-      setIsDataLoaded(true); // Still show app even if error
+      handleFirestoreError(error, OperationType.GET, 'config/media');
+      mediaLoaded = true;
+      checkLoaded();
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubMain();
+      unsubMedia();
+    };
   }, [isAuthReady]);
 
-  // Save Data Helper
-  const saveToFirebase = async (updates: any) => {
+  // Save Data Helpers
+  const saveToMain = async (updates: any) => {
     try {
       const configDoc = doc(db, 'config', 'main');
       await setDoc(configDoc, updates, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'config/main');
+    }
+  };
+
+  const saveToMedia = async (updates: any) => {
+    try {
+      const configDoc = doc(db, 'config', 'media');
+      await setDoc(configDoc, updates, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'config/media');
     }
   };
 
@@ -1220,29 +1264,29 @@ export default function App() {
             onLogin={loginWithGoogle}
             onLogout={logout}
             heroData={heroData} 
-            setHeroData={(data) => { setHeroData(data); saveToFirebase({ hero: data }); }} 
+            setHeroData={(data) => { setHeroData(data); saveToMain({ hero: data }); }} 
             quoteData={quoteData} 
-            setQuoteData={(data) => { setQuoteData(data); saveToFirebase({ quote: data }); }} 
+            setQuoteData={(data) => { setQuoteData(data); saveToMain({ quote: data }); }} 
             footerData={footerData}
-            setFooterData={(data) => { setFooterData(data); saveToFirebase({ footer: data }); }}
+            setFooterData={(data) => { setFooterData(data); saveToMain({ footer: data }); }}
             photoStripData={photoStripData}
-            setPhotoStripData={(data) => { setPhotoStripData(data); saveToFirebase({ photoStrip: data }); }}
+            setPhotoStripData={(data) => { setPhotoStripData(data); saveToMedia({ photoStrip: data }); }}
             socialPhotosData={socialPhotosData}
-            setSocialPhotosData={(data) => { setSocialPhotosData(data); saveToFirebase({ socialPhotos: data }); }}
+            setSocialPhotosData={(data) => { setSocialPhotosData(data); saveToMedia({ socialPhotos: data }); }}
             trophiesData={trophiesData}
-            setTrophiesData={(data) => { setTrophiesData(data); saveToFirebase({ trophies: data }); }}
+            setTrophiesData={(data) => { setTrophiesData(data); saveToMain({ trophies: data }); }}
             timelineData={timelineData}
-            setTimelineData={(data) => { setTimelineData(data); saveToFirebase({ timeline: data }); }}
+            setTimelineData={(data) => { setTimelineData(data); saveToMain({ timeline: data }); }}
             statsData={statsData}
-            setStatsData={(data) => { setStatsData(data); saveToFirebase({ stats: data }); }}
+            setStatsData={(data) => { setStatsData(data); saveToMain({ stats: data }); }}
             seoData={seoData}
-            setSeoData={(data) => { setSeoData(data); saveToFirebase({ seo: data }); }}
+            setSeoData={(data) => { setSeoData(data); saveToMain({ seo: data }); }}
             achievementsData={achievementsData}
-            setAchievementsData={(data) => { setAchievementsData(data); saveToFirebase({ achievements: data }); }}
+            setAchievementsData={(data) => { setAchievementsData(data); saveToMain({ achievements: data }); }}
             partnersData={partnersData}
-            setPartnersData={(data) => { setPartnersData(data); saveToFirebase({ partners: data }); }}
+            setPartnersData={(data) => { setPartnersData(data); saveToMedia({ partners: data }); }}
             signatureData={signatureData}
-            setSignatureData={(data) => { setSignatureData(data); saveToFirebase({ signature: data }); }}
+            setSignatureData={(data) => { setSignatureData(data); saveToMedia({ signature: data }); }}
           />
         )}
       </AnimatePresence>

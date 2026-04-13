@@ -106,7 +106,11 @@
   "firestore": {
     "/config/main": {
       "schema": "siteConfig",
-      "description": "The main configuration document for the site"
+      "description": "The main configuration document for the site (Hero, Quote, Footer, Trophies, Timeline, Stats, Achievements, SEO)"
+    },
+    "/config/media": {
+      "schema": "siteConfig",
+      "description": "The media configuration document for the site (PhotoStrip, SocialPhotos, Partners, Signature)"
     }
   }
 }
