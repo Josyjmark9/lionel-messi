@@ -908,10 +908,18 @@ const Preloader = () => (
       </motion.div>
     </div>
     <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.3 }}
+      transition={{ delay: 1 }}
+      className="text-[0.5rem] tracking-[0.5em] uppercase text-gold/60 mt-2"
+    >
+      Crafted by <span className="text-gold font-bold">Johnmark</span>
+    </motion.div>
+    <motion.div 
       initial={{ width: 0 }}
       animate={{ width: "120px" }}
       transition={{ duration: 2, ease: "easeInOut" }}
-      className="h-[2px] bg-gold mt-8 relative overflow-hidden"
+      className="h-[2px] bg-gold mt-6 relative overflow-hidden"
     >
       <motion.div 
         animate={{ left: ["-100%", "100%"] }}
@@ -923,18 +931,10 @@ const Preloader = () => (
       initial={{ opacity: 0 }}
       animate={{ opacity: 0.4 }}
       transition={{ delay: 0.5 }}
-      className="text-[0.5rem] tracking-[0.4em] uppercase text-gold mt-4"
+      className="text-[0.4rem] tracking-[0.4em] uppercase text-gold/40 mt-4"
     >
       Authenticating Greatness
     </motion.p>
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 0.2 }}
-      transition={{ delay: 1.5 }}
-      className="absolute bottom-12 text-[0.45rem] tracking-[0.5em] uppercase text-white/50"
-    >
-      Site Crafted by <span className="text-gold">Johnmark</span>
-    </motion.div>
   </motion.div>
 );
 
@@ -944,6 +944,8 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaveTime, setLastSaveTime] = useState<number | null>(null);
 
   const [heroData, setHeroData] = useState({
     name1: 'Lionel',
@@ -1048,13 +1050,21 @@ export default function App() {
     if (!isAuthReady) return;
 
     const mainDoc = doc(db, 'config', 'main');
-    const mediaDoc = doc(db, 'config', 'media');
+    const photosDoc = doc(db, 'config', 'media_photos');
+    const socialDoc = doc(db, 'config', 'media_social');
+    const partnersDoc = doc(db, 'config', 'media_partners');
+    const trophiesDoc = doc(db, 'config', 'media_trophies');
+    const assetsDoc = doc(db, 'config', 'media_assets');
     
     let mainLoaded = false;
-    let mediaLoaded = false;
+    let photosLoaded = false;
+    let socialLoaded = false;
+    let partnersLoaded = false;
+    let trophiesLoaded = false;
+    let assetsLoaded = false;
 
     const checkLoaded = () => {
-      if (mainLoaded && mediaLoaded) {
+      if (mainLoaded && photosLoaded && socialLoaded && partnersLoaded && trophiesLoaded && assetsLoaded) {
         setIsDataLoaded(true);
       }
     };
@@ -1066,7 +1076,6 @@ export default function App() {
         if (data.hero) setHeroData(data.hero);
         if (data.quote) setQuoteData(data.quote);
         if (data.footer) setFooterData(data.footer);
-        if (data.trophies) setTrophiesData(data.trophies);
         if (data.timeline) setTimelineData(data.timeline);
         if (data.stats) setStatsData(data.stats);
         if (data.seo) setSeoData(data.seo);
@@ -1080,47 +1089,106 @@ export default function App() {
       checkLoaded();
     });
 
-    const unsubMedia = onSnapshot(mediaDoc, (snapshot) => {
+    const unsubPhotos = onSnapshot(photosDoc, (snapshot) => {
       if (snapshot.metadata.hasPendingWrites) return;
       if (snapshot.exists()) {
         const data = snapshot.data();
         if (data.photoStrip) setPhotoStripData(data.photoStrip);
-        if (data.socialPhotos) setSocialPhotosData(data.socialPhotos);
-        if (data.partners) setPartnersData(data.partners);
-        if (data.signature !== undefined) setSignatureData(data.signature);
       }
-      mediaLoaded = true;
+      photosLoaded = true;
       checkLoaded();
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, 'config/media');
-      mediaLoaded = true;
+      handleFirestoreError(error, OperationType.GET, 'config/media_photos');
+      photosLoaded = true;
+      checkLoaded();
+    });
+
+    const unsubSocial = onSnapshot(socialDoc, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.socialPhotos) setSocialPhotosData(data.socialPhotos);
+      }
+      socialLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'config/media_social');
+      socialLoaded = true;
+      checkLoaded();
+    });
+
+    const unsubPartners = onSnapshot(partnersDoc, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.partners) setPartnersData(data.partners);
+      }
+      partnersLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'config/media_partners');
+      partnersLoaded = true;
+      checkLoaded();
+    });
+
+    const unsubTrophies = onSnapshot(trophiesDoc, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.trophies) setTrophiesData(data.trophies);
+      }
+      trophiesLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'config/media_trophies');
+      trophiesLoaded = true;
+      checkLoaded();
+    });
+
+    const unsubAssets = onSnapshot(assetsDoc, (snapshot) => {
+      if (snapshot.metadata.hasPendingWrites) return;
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.signature !== undefined) setSignatureData(data.signature);
+      }
+      assetsLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'config/media_assets');
+      assetsLoaded = true;
       checkLoaded();
     });
 
     return () => {
       unsubMain();
-      unsubMedia();
+      unsubPhotos();
+      unsubSocial();
+      unsubPartners();
+      unsubTrophies();
+      unsubAssets();
     };
   }, [isAuthReady]);
 
   // Save Data Helpers
-  const saveToMain = async (updates: any) => {
+  const saveToDoc = async (docId: string, updates: any) => {
+    setIsSaving(true);
     try {
-      const configDoc = doc(db, 'config', 'main');
+      const configDoc = doc(db, 'config', docId);
       await setDoc(configDoc, updates, { merge: true });
+      setLastSaveTime(Date.now());
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'config/main');
+      handleFirestoreError(error, OperationType.WRITE, `config/${docId}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const saveToMedia = async (updates: any) => {
-    try {
-      const configDoc = doc(db, 'config', 'media');
-      await setDoc(configDoc, updates, { merge: true });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'config/media');
-    }
-  };
+  const saveToMain = (updates: any) => saveToDoc('main', updates);
+  const saveToPhotos = (updates: any) => saveToDoc('media_photos', updates);
+  const saveToSocial = (updates: any) => saveToDoc('media_social', updates);
+  const saveToPartners = (updates: any) => saveToDoc('media_partners', updates);
+  const saveToTrophies = (updates: any) => saveToDoc('media_trophies', updates);
+  const saveToAssets = (updates: any) => saveToDoc('media_assets', updates);
 
   // Update SEO Meta Tags
   useEffect(() => {
@@ -1279,11 +1347,11 @@ export default function App() {
             footerData={footerData}
             setFooterData={(data) => { setFooterData(data); saveToMain({ footer: data }); }}
             photoStripData={photoStripData}
-            setPhotoStripData={(data) => { setPhotoStripData(data); saveToMedia({ photoStrip: data }); }}
+            setPhotoStripData={(data) => { setPhotoStripData(data); saveToPhotos({ photoStrip: data }); }}
             socialPhotosData={socialPhotosData}
-            setSocialPhotosData={(data) => { setSocialPhotosData(data); saveToMedia({ socialPhotos: data }); }}
+            setSocialPhotosData={(data) => { setSocialPhotosData(data); saveToSocial({ socialPhotos: data }); }}
             trophiesData={trophiesData}
-            setTrophiesData={(data) => { setTrophiesData(data); saveToMain({ trophies: data }); }}
+            setTrophiesData={(data) => { setTrophiesData(data); saveToTrophies({ trophies: data }); }}
             timelineData={timelineData}
             setTimelineData={(data) => { setTimelineData(data); saveToMain({ timeline: data }); }}
             statsData={statsData}
@@ -1293,9 +1361,11 @@ export default function App() {
             achievementsData={achievementsData}
             setAchievementsData={(data) => { setAchievementsData(data); saveToMain({ achievements: data }); }}
             partnersData={partnersData}
-            setPartnersData={(data) => { setPartnersData(data); saveToMedia({ partners: data }); }}
+            setPartnersData={(data) => { setPartnersData(data); saveToPartners({ partners: data }); }}
             signatureData={signatureData}
-            setSignatureData={(data) => { setSignatureData(data); saveToMedia({ signature: data }); }}
+            setSignatureData={(data) => { setSignatureData(data); saveToAssets({ signature: data }); }}
+            isSaving={isSaving}
+            lastSaveTime={lastSaveTime}
           />
         )}
       </AnimatePresence>

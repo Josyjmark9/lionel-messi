@@ -18,11 +18,24 @@ service cloud.firestore {
     //   - achievements: list of objects
     //   - seo: object
     //
-    // Document ID: media
+    // Document ID: media_photos
     // Fields:
     //   - photoStrip: list of objects
+    //
+    // Document ID: media_social
+    // Fields:
     //   - socialPhotos: list of strings
+    //
+    // Document ID: media_partners
+    // Fields:
     //   - partners: list of objects
+    //
+    // Document ID: media_trophies
+    // Fields:
+    //   - trophies: list of objects
+    //
+    // Document ID: media_assets
+    // Fields:
     //   - signature: string (base64)
     //
     // ===============================================================

@@ -108,9 +108,25 @@
       "schema": "siteConfig",
       "description": "The main configuration document for the site (Hero, Quote, Footer, Trophies, Timeline, Stats, Achievements, SEO)"
     },
-    "/config/media": {
+    "/config/media_photos": {
       "schema": "siteConfig",
-      "description": "The media configuration document for the site (PhotoStrip, SocialPhotos, Partners, Signature)"
+      "description": "The media configuration document for the photo strip"
+    },
+    "/config/media_social": {
+      "schema": "siteConfig",
+      "description": "The media configuration document for social photos"
+    },
+    "/config/media_partners": {
+      "schema": "siteConfig",
+      "description": "The media configuration document for partners and brands"
+    },
+    "/config/media_trophies": {
+      "schema": "siteConfig",
+      "description": "The media configuration document for trophies"
+    },
+    "/config/media_assets": {
+      "schema": "siteConfig",
+      "description": "The media configuration document for other assets like the signature"
     }
   }
 }

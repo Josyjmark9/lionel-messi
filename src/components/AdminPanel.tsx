@@ -59,6 +59,8 @@ interface AdminPanelProps {
   setPartnersData: (data: any[]) => void;
   signatureData: string;
   setSignatureData: (data: string) => void;
+  isSaving?: boolean;
+  lastSaveTime?: number | null;
 }
 
 const ADMIN_EMAIL = "josiahjohnmark9@gmail.com";
@@ -92,7 +94,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   partnersData,
   setPartnersData,
   signatureData,
-  setSignatureData
+  setSignatureData,
+  isSaving = false,
+  lastSaveTime = null
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -130,7 +134,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
-  const compressImage = (base64Str: string, maxWidth = 1000, maxHeight = 1000, forcePng = false): Promise<string> => {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800, forcePng = false): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = base64Str;
@@ -161,10 +167,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         }
         
         // Use PNG for transparency if forced or if the source was PNG/WebP
-        // For signature and logos, we ALWAYS want to preserve transparency if possible
         const isTransparent = forcePng || base64Str.startsWith('data:image/png') || base64Str.startsWith('data:image/webp');
         const outputType = isTransparent ? 'image/png' : 'image/jpeg';
-        const quality = isTransparent ? 1.0 : 0.7;
+        const quality = isTransparent ? 0.8 : 0.6; // Reduced quality to save space
           
         resolve(canvas.toDataURL(outputType, quality));
       };
@@ -174,19 +179,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'footer' | 'profile') => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 1000, 1000, isPng);
+        const compressed = await compressImage(reader.result as string, 800, 800, isPng);
         if (type === 'hero') {
           setHeroData({ ...heroData, bgImage: compressed });
         } else if (type === 'profile') {
           // Always force PNG for profile image to preserve transparency
-          const forcePngCompressed = await compressImage(reader.result as string, 1000, 1000, true);
+          const forcePngCompressed = await compressImage(reader.result as string, 800, 800, true);
           setHeroData({ ...heroData, profileImage: forcePngCompressed });
         } else {
           setFooterData({ ...footerData, bgImage: compressed });
         }
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     }
@@ -195,13 +202,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handlePhotoStripUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 1000, 1000, isPng);
+        const compressed = await compressImage(reader.result as string, 800, 800, isPng);
         const newData = [...photoStripData];
         newData[index] = { ...newData[index], image: compressed };
         setPhotoStripData(newData);
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     }
@@ -210,13 +219,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleSocialPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 1000, 1000, isPng);
+        const compressed = await compressImage(reader.result as string, 600, 600, isPng);
         const newData = [...socialPhotosData];
         newData[index] = compressed;
         setSocialPhotosData(newData);
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     }
@@ -225,13 +236,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleTrophyUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 800, 800, isPng);
+        const compressed = await compressImage(reader.result as string, 600, 600, isPng);
         const newData = [...trophiesData];
         newData[index] = { ...newData[index], imageUrl: compressed };
         setTrophiesData(newData);
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     }
@@ -240,12 +253,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handlePartnerUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
+      const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 400, 400, true);
+        const compressed = await compressImage(reader.result as string, 300, 300, isPng);
         const newData = [...partnersData];
         newData[index] = { ...newData[index], logo: compressed };
         setPartnersData(newData);
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     }
@@ -254,10 +270,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 1200, 600, true);
+        const compressed = await compressImage(reader.result as string, 1000, 500, true);
         setSignatureData(compressed);
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
     }
@@ -1327,14 +1345,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
         {/* Footer Bar */}
         <footer className="bg-dark border-t border-gold/15 px-8 py-4 flex justify-between items-center">
-          <div className="text-[0.6rem] text-gray tracking-widest">
-            Admin Panel — LM10 Website · Built by <strong>Josiah Johnmark</strong>
+          <div className="flex items-center gap-6">
+            <div className="text-[0.6rem] text-gray tracking-widest">
+              Admin Panel — LM10 Website · Built by <strong>Josiah Johnmark</strong>
+            </div>
+            
+            {isSaving ? (
+              <div className="flex items-center gap-2 text-[0.5rem] text-gold animate-pulse uppercase tracking-widest">
+                <div className="w-1.5 h-1.5 bg-gold rounded-full animate-bounce" />
+                Syncing with Database...
+              </div>
+            ) : lastSaveTime ? (
+              <div className="text-[0.5rem] text-green-500/60 uppercase tracking-widest flex items-center gap-2">
+                <div className="w-1 h-1 bg-green-500 rounded-full" />
+                All changes saved ({new Date(lastSaveTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })})
+              </div>
+            ) : null}
+
+            {isUploading && (
+              <div className="flex items-center gap-2 text-[0.5rem] text-gold animate-pulse uppercase tracking-widest">
+                <div className="w-1.5 h-1.5 bg-gold rounded-full animate-bounce" />
+                Processing Image...
+              </div>
+            )}
           </div>
           <button 
             onClick={onClose}
-            className="bg-gold text-black px-6 py-2 text-[0.6rem] font-bold tracking-widest uppercase hover:bg-gold-light transition-colors"
+            disabled={isUploading || isSaving}
+            className={`bg-gold text-black px-6 py-2 text-[0.6rem] font-bold tracking-widest uppercase transition-colors ${(isUploading || isSaving) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gold-light'}`}
           >
-            Save All Changes
+            {isUploading ? 'Processing...' : isSaving ? 'Syncing...' : 'Save All Changes'}
           </button>
         </footer>
       </main>
